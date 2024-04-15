@@ -1,6 +1,6 @@
 name: lua_dardo
 description: A Lua virtual machine written in Dart, which implements Lua5.3 version.
-version: 0.0.5
+version: 0.0.6
 homepage: https://github.com/arcticfox1919/LuaDardo.git
 
 environment:
@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   sprintf: ^7.0.0
+  universal_io: ^2.2.2
 
 dev_dependencies:
   pedantic: ^1.11.1

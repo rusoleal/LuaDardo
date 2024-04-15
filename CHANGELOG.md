@@ -1,3 +1,7 @@
+## 0.0.6
+
+* Change dart:io to universal_io for web platform
+
 ## 0.0.5
 * Fix issues [#10](https://github.com/arcticfox1919/LuaDardo/issues/10)
 * Fix warning
