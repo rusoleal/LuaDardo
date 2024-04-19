@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:universal_io/io.dart';
+import 'dart:io';
 import 'dart:typed_data';
 
 import '../api/lua_state.dart';
