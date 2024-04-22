@@ -391,19 +391,33 @@ class Lexer {
   }
 
   String readNumeral() {
-    String expo = "Ee";
+    //print('readNumeral');
+    String expo = "[Ee]";
     String first = chunk.current;
     _save_and_next();
-    if (first == '0' && chunk.startsWith("xX"))  /* hexadecimal? */
-      expo = "Pp";
+    if (first == '0' && chunk.startsWithRegexp(RegExp("[xX]"))) {
+      /* hexadecimal? */
+      expo = "[Pp]";
+      _save_and_next();
+    }
 
     for (;;) {
-      if (chunk.startsWith(expo))  /* exponent part? */
-        chunk.startsWith("-+");  /* optional exponent sign */
-      if (CharSequence.isxDigit(chunk.current) || chunk.current == '.')
+      if (chunk.startsWithRegexp(RegExp(expo))) {
+        /* exponent part? */
         _save_and_next();
-      else break;
+        if (chunk.startsWithRegexp(RegExp("[-\+]"))) {
+          /* optional exponent sign */
+          _save_and_next();
+        }
+      }
+      if (CharSequence.isxDigit(chunk.current) || chunk.current == '.') {
+        _save_and_next();
+      }
+      else  {
+        break;
+      }
     }
+    //print('readNumeral result: ${_buff.toString()}');
     return _buff.toString();
   }
 

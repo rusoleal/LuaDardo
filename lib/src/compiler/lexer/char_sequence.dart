@@ -22,6 +22,10 @@ class CharSequence {
     return _str.startsWith(prefix, _pos);
   }
 
+  bool startsWithRegexp(Pattern prefix) {
+    return _str.startsWith(prefix, _pos);
+  }
+
   int indexOf(String s) {
     return _str.indexOf(s, _pos) - _pos;
   }
