@@ -158,4 +158,6 @@ abstract class LuaBasicAPI {
   int error();
 
   bool stringToNumber(String s);
+
+  int getStackSize();
 }
