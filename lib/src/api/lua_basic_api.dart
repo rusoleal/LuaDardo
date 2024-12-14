@@ -73,7 +73,7 @@ abstract class LuaBasicAPI {
 
   Object? toPointer(int idx);
 
-  Userdata? toUserdata<T>(int idx);
+  Userdata<T>? toUserdata<T>(int idx);
 
   int rawLen(int idx);
 
@@ -106,7 +106,7 @@ abstract class LuaBasicAPI {
 /* get functions (Lua -> stack) */
   void newTable();
 
-  Userdata newUserdata<T>();
+  Userdata<T> newUserdata<T>();
 
   void createTable(int nArr, int nRec);
 

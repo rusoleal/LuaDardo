@@ -1,3 +1,7 @@
+## 0.0.10
+
+* UserData methods casted to UserData<T>
+
 ## 0.0.6
 
 * Change dart:io to universal_io for web platform
