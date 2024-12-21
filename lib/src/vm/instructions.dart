@@ -6,7 +6,7 @@ import 'instruction.dart';
 
 class Instructions {
   /// number of list items to accumulate before a SETLIST instruction
-  static final int lfields_per_flush = 50;
+  static final int lFieldsPerFlush = 50;
 
   /* misc */
 
@@ -344,7 +344,7 @@ class Instructions {
     }
 
     vm.checkStack(1);
-    int idx = c * lfields_per_flush;
+    int idx = c * lFieldsPerFlush;
     for (int j = 1; j <= b; j++) {
       idx++;
       vm.pushValue(a + j);

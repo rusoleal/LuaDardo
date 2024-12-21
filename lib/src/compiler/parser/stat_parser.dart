@@ -27,72 +27,72 @@ class StatParser {
         | functioncall
     */
   static Stat parseStat(Lexer lexer) {
-    switch (lexer.LookAhead()) {
-      case TokenKind.TOKEN_SEP_SEMI:    return parseEmptyStat(lexer);
-      case TokenKind.TOKEN_KW_BREAK:    return parseBreakStat(lexer);
-      case TokenKind.TOKEN_SEP_LABEL:   return parseLabelStat(lexer);
-      case TokenKind.TOKEN_KW_GOTO:     return parseGotoStat(lexer);
-      case TokenKind.TOKEN_KW_DO:       return parseDoStat(lexer);
-      case TokenKind.TOKEN_KW_WHILE:    return parseWhileStat(lexer);
-      case TokenKind.TOKEN_KW_REPEAT:   return parseRepeatStat(lexer);
-      case TokenKind.TOKEN_KW_IF:       return parseIfStat(lexer);
-      case TokenKind.TOKEN_KW_FOR:      return parseForStat(lexer);
-      case TokenKind.TOKEN_KW_FUNCTION: return parseFuncDefStat(lexer);
-      case TokenKind.TOKEN_KW_LOCAL:    return parseLocalAssignOrFuncDefStat(lexer);
+    switch (lexer.lookAhead()) {
+      case TokenKind.sepSemi:    return parseEmptyStat(lexer);
+      case TokenKind.kwBreak:    return parseBreakStat(lexer);
+      case TokenKind.sepLabel:   return parseLabelStat(lexer);
+      case TokenKind.kwGoto:     return parseGotoStat(lexer);
+      case TokenKind.kwDo:       return parseDoStat(lexer);
+      case TokenKind.kwWhile:    return parseWhileStat(lexer);
+      case TokenKind.kwRepeat:   return parseRepeatStat(lexer);
+      case TokenKind.kwIf:       return parseIfStat(lexer);
+      case TokenKind.kwFor:      return parseForStat(lexer);
+      case TokenKind.kwFunction: return parseFuncDefStat(lexer);
+      case TokenKind.kwLocal:    return parseLocalAssignOrFuncDefStat(lexer);
       default:                return parseAssignOrFuncCallStat(lexer);
     }
   }
 
   // ;
    static EmptyStat parseEmptyStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_SEP_SEMI);
+    lexer.nextTokenOfKind(TokenKind.sepSemi);
     return EmptyStat.instance;
   }
 
   // break
    static BreakStat parseBreakStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_BREAK);
+    lexer.nextTokenOfKind(TokenKind.kwBreak);
     return BreakStat(lexer.line);
   }
 
   // ‘::’ Name ‘::’
    static LabelStat parseLabelStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_SEP_LABEL);          // ::
+    lexer.nextTokenOfKind(TokenKind.sepLabel);          // ::
     String? name = lexer.nextIdentifier().value; // name
-    lexer.nextTokenOfKind(TokenKind.TOKEN_SEP_LABEL);          // ::
+    lexer.nextTokenOfKind(TokenKind.sepLabel);          // ::
     return LabelStat(name);
   }
 
   // goto Name
    static GotoStat parseGotoStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_GOTO);            // goto
+    lexer.nextTokenOfKind(TokenKind.kwGoto);            // goto
     String? name = lexer.nextIdentifier().value; // name
     return GotoStat(name);
   }
 
   // do block end
    static DoStat parseDoStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_DO);  // do
+    lexer.nextTokenOfKind(TokenKind.kwDo);  // do
     Block block = BlockParser.parseBlock(lexer);     // block
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_END); // end
+    lexer.nextTokenOfKind(TokenKind.kwEnd); // end
     return DoStat(block);
   }
 
   // while exp do block end
    static WhileStat parseWhileStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_WHILE); // while
+    lexer.nextTokenOfKind(TokenKind.kwWhile); // while
     Exp exp = ExpParser.parseExp(lexer);             // exp
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_DO);    // do
+    lexer.nextTokenOfKind(TokenKind.kwDo);    // do
     Block block = BlockParser.parseBlock(lexer);       // block
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_END);   // end
+    lexer.nextTokenOfKind(TokenKind.kwEnd);   // end
     return WhileStat(exp, block);
   }
 
   // repeat block until exp
    static RepeatStat parseRepeatStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_REPEAT); // repeat
+    lexer.nextTokenOfKind(TokenKind.kwRepeat); // repeat
     Block block = BlockParser.parseBlock(lexer);        // block
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_UNTIL);  // until
+    lexer.nextTokenOfKind(TokenKind.kwUntil);  // until
     Exp exp = ExpParser.parseExp(lexer);              // exp
     return RepeatStat(block, exp);
   }
@@ -102,35 +102,35 @@ class StatParser {
     List<Exp> exps = <Exp>[];
     List<Block> blocks = <Block>[];
 
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_IF);       // if
+    lexer.nextTokenOfKind(TokenKind.kwIf);       // if
     exps.add(ExpParser.parseExp(lexer));                // exp
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_THEN);     // then
+    lexer.nextTokenOfKind(TokenKind.kwThen);     // then
     blocks.add(BlockParser.parseBlock(lexer));            // block
 
-    while (lexer.LookAhead() == TokenKind.TOKEN_KW_ELSEIF) {
+    while (lexer.lookAhead() == TokenKind.kwElseif) {
       lexer.nextToken();                    // elseif
       exps.add(ExpParser.parseExp(lexer));            // exp
-      lexer.nextTokenOfKind(TokenKind.TOKEN_KW_THEN); // then
+      lexer.nextTokenOfKind(TokenKind.kwThen); // then
       blocks.add(BlockParser.parseBlock(lexer));        // block
     }
 
     // else block => elseif true then block
-    if (lexer.LookAhead() == TokenKind.TOKEN_KW_ELSE) {
+    if (lexer.lookAhead() == TokenKind.kwElse) {
       lexer.nextToken();                    // else
       exps.add(TrueExp(lexer.line));  //
       blocks.add(BlockParser.parseBlock(lexer));        // block
     }
 
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_END);      // end
+    lexer.nextTokenOfKind(TokenKind.kwEnd);      // end
     return IfStat(exps, blocks);
   }
 
   // for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end
   // for namelist in explist do block end
    static Stat parseForStat(Lexer lexer) {
-    int lineOfFor = lexer.nextTokenOfKind(TokenKind.TOKEN_KW_FOR).line;
+    int lineOfFor = lexer.nextTokenOfKind(TokenKind.kwFor).line;
     String name = lexer.nextIdentifier().value;
-    if (lexer.LookAhead() == TokenKind.TOKEN_OP_ASSIGN) {
+    if (lexer.lookAhead() == TokenKind.opAssign) {
       return finishForNumStat(lexer, name, lineOfFor);
     } else {
       return finishForInStat(lexer, name);
@@ -139,22 +139,22 @@ class StatParser {
 
   // for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end
   static ForNumStat finishForNumStat(Lexer lexer, String name, int lineOfFor) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_OP_ASSIGN); // =
+    lexer.nextTokenOfKind(TokenKind.opAssign); // =
     var initExp = ExpParser.parseExp(lexer); // exp
-    lexer.nextTokenOfKind(TokenKind.TOKEN_SEP_COMMA); // ,
+    lexer.nextTokenOfKind(TokenKind.sepComma); // ,
     var limitExp = ExpParser.parseExp(lexer); // exp
-    var stepExp;
-    if (lexer.LookAhead() == TokenKind.TOKEN_SEP_COMMA) {
+    Exp stepExp;
+    if (lexer.lookAhead() == TokenKind.sepComma) {
       lexer.nextToken(); // ,
       stepExp = ExpParser.parseExp(lexer); // exp
     } else {
       stepExp = IntegerExp(lexer.line, 1);
     }
 
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_DO); // do
+    lexer.nextTokenOfKind(TokenKind.kwDo); // do
     var lineOfDo = lexer.line; //
     var block = BlockParser.parseBlock(lexer); // block
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_END); // end
+    lexer.nextTokenOfKind(TokenKind.kwEnd); // end
 
     return ForNumStat(
         lineOfFor: lineOfFor,
@@ -174,12 +174,12 @@ class StatParser {
   static ForInStat finishForInStat(Lexer lexer, String name0) {
     // for
     var nameList = finishNameList(lexer, name0); // namelist
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_IN); // in
+    lexer.nextTokenOfKind(TokenKind.kwIn); // in
     var expList = ExpParser.parseExpList(lexer); // explist
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_DO); // do
+    lexer.nextTokenOfKind(TokenKind.kwDo); // do
     var lineOfDo = lexer.line; //
     var block = BlockParser.parseBlock(lexer); // block
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_END); // end
+    lexer.nextTokenOfKind(TokenKind.kwEnd); // end
 
     return ForInStat(
         nameList: nameList, expList: expList, lineOfDo: lineOfDo, block: block);
@@ -189,7 +189,7 @@ class StatParser {
    static List<String> finishNameList(Lexer lexer, String name0) {
     List<String> names = <String>[];
     names.add(name0);
-    while (lexer.LookAhead() == TokenKind.TOKEN_SEP_COMMA) {
+    while (lexer.lookAhead() == TokenKind.sepComma) {
       lexer.nextToken();                            // ,
       names.add(lexer.nextIdentifier().value); // Name
     }
@@ -199,8 +199,8 @@ class StatParser {
   // local function Name funcbody
   // local namelist [‘=’ explist]
    static Stat parseLocalAssignOrFuncDefStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_LOCAL);
-    if (lexer.LookAhead() == TokenKind.TOKEN_KW_FUNCTION) {
+    lexer.nextTokenOfKind(TokenKind.kwLocal);
+    if (lexer.lookAhead() == TokenKind.kwFunction) {
       return finishLocalFuncDefStat(lexer);
     } else {
       return finishLocalVarDeclStat(lexer);
@@ -223,7 +223,7 @@ class StatParser {
     */
   // local function Name funcbody
    static LocalFuncDefStat finishLocalFuncDefStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_FUNCTION);        // local function
+    lexer.nextTokenOfKind(TokenKind.kwFunction);        // local function
     String? name = lexer.nextIdentifier().value; // name
     FuncDefExp fdExp = ExpParser.parseFuncDefExp(lexer);       // funcbody
     return LocalFuncDefStat(name, fdExp);
@@ -234,7 +234,7 @@ class StatParser {
     String name0 = lexer.nextIdentifier().value;     // local Name
     List<String> nameList = finishNameList(lexer, name0); // { , Name }
     List<Exp>? expList;
-    if (lexer.LookAhead() == TokenKind.TOKEN_OP_ASSIGN) {
+    if (lexer.lookAhead() == TokenKind.opAssign) {
       lexer.nextToken();                                // ==
       expList = ExpParser.parseExpList(lexer);                    // explist
     }
@@ -256,7 +256,7 @@ class StatParser {
   // varlist ‘=’ explist |
    static AssignStat parseAssignStat(Lexer lexer, Exp var0) {
     List<Exp> varList = finishVarList(lexer, var0); // varlist
-    lexer.nextTokenOfKind(TokenKind.TOKEN_OP_ASSIGN);         // =
+    lexer.nextTokenOfKind(TokenKind.opAssign);         // =
     List<Exp> expList = ExpParser.parseExpList(lexer);        // explist
     int lastLine = lexer.line;
     return AssignStat(lastLine, varList, expList);
@@ -266,7 +266,7 @@ class StatParser {
    static List<Exp> finishVarList(Lexer lexer, Exp var0) {
     List<Exp> vars = <Exp>[];
     vars.add(checkVar(lexer, var0));               // var
-    while (lexer.LookAhead() == TokenKind.TOKEN_SEP_COMMA) { // {
+    while (lexer.lookAhead() == TokenKind.sepComma) { // {
       lexer.nextToken();                         // ,
       Exp exp = PrefixExpParser.parsePrefixExp(lexer);           // var
       vars.add(checkVar(lexer, exp));            //
@@ -289,7 +289,7 @@ class StatParser {
   // parlist ::= namelist [‘,’ ‘...’] | ‘...’
   // namelist ::= Name {‘,’ Name}
    static AssignStat parseFuncDefStat(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_KW_FUNCTION);     // function
+    lexer.nextTokenOfKind(TokenKind.kwFunction);     // function
     Map<Exp, bool> map = parseFuncName(lexer); // funcname
     Exp fnExp = map.keys.first;
     bool hasColon = map.values.first;
@@ -307,13 +307,13 @@ class StatParser {
     Exp exp = NameExp(id.line, id.value);
     bool hasColon = false;
 
-    while (lexer.LookAhead() == TokenKind.TOKEN_SEP_DOT) {
+    while (lexer.lookAhead() == TokenKind.sepDot) {
       lexer.nextToken();
       id = lexer.nextIdentifier();
       Exp idx = StringExp.fromToken(id);
       exp = TableAccessExp(id.line, exp, idx);
     }
-    if (lexer.LookAhead() == TokenKind.TOKEN_SEP_COLON) {
+    if (lexer.lookAhead() == TokenKind.sepColon) {
       lexer.nextToken();
       id = lexer.nextIdentifier();
       Exp idx = StringExp.fromToken(id);
@@ -322,7 +322,7 @@ class StatParser {
     }
 
     // workaround: return multiple values
-    return Map<Exp, bool>()..[exp] = hasColon;
+    return {}..[exp] = hasColon;
   }
 
 }

@@ -28,18 +28,18 @@ class LocVarInfo {
 class FuncInfo {
   static final Map<TokenKind, OpCodeKind> arithAndBitwiseBinops =
       <TokenKind, OpCodeKind>{
-    TokenKind.TOKEN_OP_ADD: OpCodeKind.ADD,
-    TokenKind.TOKEN_OP_SUB: OpCodeKind.SUB,
-    TokenKind.TOKEN_OP_MUL: OpCodeKind.MUL,
-    TokenKind.TOKEN_OP_MOD: OpCodeKind.MOD,
-    TokenKind.TOKEN_OP_POW: OpCodeKind.POW,
-    TokenKind.TOKEN_OP_DIV: OpCodeKind.DIV,
-    TokenKind.TOKEN_OP_IDIV: OpCodeKind.IDIV,
-    TokenKind.TOKEN_OP_BAND: OpCodeKind.BAND,
-    TokenKind.TOKEN_OP_BOR: OpCodeKind.BOR,
-    TokenKind.TOKEN_OP_BXOR: OpCodeKind.BXOR,
-    TokenKind.TOKEN_OP_SHL: OpCodeKind.SHL,
-    TokenKind.TOKEN_OP_SHR: OpCodeKind.SHR,
+    TokenKind.opAdd: OpCodeKind.add,
+    TokenKind.opSub: OpCodeKind.sub,
+    TokenKind.opMul: OpCodeKind.mul,
+    TokenKind.opMod: OpCodeKind.mod,
+    TokenKind.opPow: OpCodeKind.pow,
+    TokenKind.opDiv: OpCodeKind.div,
+    TokenKind.opIDiv: OpCodeKind.idiv,
+    TokenKind.opBand: OpCodeKind.band,
+    TokenKind.opBor: OpCodeKind.bOr,
+    TokenKind.opBXor: OpCodeKind.bXor,
+    TokenKind.opShl: OpCodeKind.shl,
+    TokenKind.opShr: OpCodeKind.shr,
   };
 
   FuncInfo? parent;
@@ -48,9 +48,9 @@ class FuncInfo {
   int maxRegs = 0;
   int scopeLv = 0;
   List<LocVarInfo> locVars = <LocVarInfo>[];
-  Map<String?, LocVarInfo?> locNames = Map<String?, LocVarInfo?>();
-  Map<String?, UpvalInfo> upvalues = Map<String?, UpvalInfo>();
-  Map<Object?, int> constants = Map<Object?, int>();
+  Map<String?, LocVarInfo?> locNames = {};
+  Map<String?, UpvalInfo> upvalues = {};
+  Map<Object?, int> constants = {};
   List<List<int>?> breaks = <List<int>?>[];
   List<int> insts = <int>[];
   List<int> lineNums = <int>[];
@@ -59,8 +59,7 @@ class FuncInfo {
   int? numParams;
   bool? isVararg;
 
-  FuncInfo(FuncInfo? parent, FuncDefExp fd) {
-    this.parent = parent;
+  FuncInfo(this.parent, FuncDefExp fd) {
     line = fd.line;
     lastLine = fd.lastLine;
     numParams = fd.parList.length;
@@ -136,12 +135,12 @@ class FuncInfo {
 
     if (pendingBreakJmps != null) {
       int a = getJmpArgA();
-      for (int _pc in pendingBreakJmps) {
-        int sBx = pc() - _pc;
-        int i = LuaMath.toInt32((sBx + Instruction.maxArg_sbx) << 14) | 
+      for (int pcValue in pendingBreakJmps) {
+        int sBx = pc() - pcValue;
+        int i = LuaMath.toInt32((sBx + Instruction.maxArgSbx) << 14) | 
         LuaMath.toInt32(a << 6) | 
-        OpCodeKind.JMP.index;
-        insts[_pc] = i;
+        OpCodeKind.jmp.index;
+        insts[pcValue] = i;
       }
     }
     
@@ -270,7 +269,7 @@ class FuncInfo {
   void fixSbx(int pc, int sBx) {
     int i = insts[pc];
     i = LuaMath.toInt32(i << 18) >> 18; // clear sBx
-    i = i | LuaMath.toInt32((sBx + Instruction.maxArg_sbx) << 14); // reset sBx
+    i = i | LuaMath.toInt32((sBx + Instruction.maxArgSbx) << 14); // reset sBx
     insts[pc] = i;
   }
 
@@ -298,7 +297,7 @@ class FuncInfo {
   }
 
   void emitAsBx(int line, OpCodeKind opcode, int a, int sBx) {
-    int i = LuaMath.toInt32((sBx + Instruction.maxArg_sbx) << 14) |
+    int i = LuaMath.toInt32((sBx + Instruction.maxArgSbx) << 14) |
     a << 6 | opcode.index;
     insts.add(i);
     lineNums.add(line);
@@ -312,148 +311,148 @@ class FuncInfo {
 
 // r[a] = r[b]
   void emitMove(int line, int a, int b) {
-    emitABC(line, OpCodeKind.MOVE, a, b, 0);
+    emitABC(line, OpCodeKind.move, a, b, 0);
   }
 
 // r[a], r[a+1], ..., r[a+b] = nil
   void emitLoadNil(int line, int a, int n) {
-    emitABC(line, OpCodeKind.LOADNIL, a, n - 1, 0);
+    emitABC(line, OpCodeKind.loadNil, a, n - 1, 0);
   }
 
 // r[a] = (bool)b; if (c) pc++
   void emitLoadBool(int line, int a, int b, int c) {
-    emitABC(line, OpCodeKind.LOADBOOL, a, b, c);
+    emitABC(line, OpCodeKind.loadBool, a, b, c);
   }
 
 // r[a] = kst[bx]
   void emitLoadK(int line, int? a, Object? k) {
     int idx = indexOfConstant(k);
     if (idx < (1 << 18)) {
-      emitABx(line, OpCodeKind.LOADK, a!, idx);
+      emitABx(line, OpCodeKind.loadK, a!, idx);
     } else {
-      emitABx(line, OpCodeKind.LOADKX, a!, 0);
-      emitAx(line, OpCodeKind.EXTRAARG, idx);
+      emitABx(line, OpCodeKind.loadKx, a!, 0);
+      emitAx(line, OpCodeKind.extraArg, idx);
     }
   }
 
 // r[a], r[a+1], ..., r[a+b-2] = vararg
   void emitVararg(int line, int a, int n) {
-    emitABC(line, OpCodeKind.VARARG, a, n + 1, 0);
+    emitABC(line, OpCodeKind.varArg, a, n + 1, 0);
   }
 
 // r[a] = emitClosure(proto[bx])
   void emitClosure(int line, int a, int bx) {
-    emitABx(line, OpCodeKind.CLOSURE, a, bx);
+    emitABx(line, OpCodeKind.closure, a, bx);
   }
 
 // r[a] = {}
   void emitNewTable(int line, int a, int nArr, int nRec) {
-    emitABC(line, OpCodeKind.NEWTABLE, a, FPB.int2fb(nArr), FPB.int2fb(nRec));
+    emitABC(line, OpCodeKind.newTable, a, FPB.int2fb(nArr), FPB.int2fb(nRec));
   }
 
 // r[a][(c-1)*FPF+i] = r[a+i], 1 <= i <= b
   void emitSetList(int line, int a, int b, int c) {
-    emitABC(line, OpCodeKind.SETLIST, a, b, c);
+    emitABC(line, OpCodeKind.setList, a, b, c);
   }
 
 // r[a] = r[b][rk(c)]
   void emitGetTable(int line, int a, int b, int c) {
-    emitABC(line, OpCodeKind.GETTABLE, a, b, c);
+    emitABC(line, OpCodeKind.getTable, a, b, c);
   }
 
 // r[a][rk(b)] = rk(c)
   void emitSetTable(int line, int a, int b, int c) {
-    emitABC(line, OpCodeKind.SETTABLE, a, b, c);
+    emitABC(line, OpCodeKind.setTable, a, b, c);
   }
 
 // r[a] = upval[b]
   void emitGetUpval(int line, int a, int b) {
-    emitABC(line, OpCodeKind.GETUPVAL, a, b, 0);
+    emitABC(line, OpCodeKind.getUpVal, a, b, 0);
   }
 
 // upval[b] = r[a]
   void emitSetUpval(int line, int a, int b) {
-    emitABC(line, OpCodeKind.SETUPVAL, a, b, 0);
+    emitABC(line, OpCodeKind.setUpVal, a, b, 0);
   }
 
 // r[a] = upval[b][rk(c)]
   void emitGetTabUp(int line, int a, int b, int c) {
-    emitABC(line, OpCodeKind.GETTABUP, a, b, c);
+    emitABC(line, OpCodeKind.getTabUp, a, b, c);
   }
 
 // upval[a][rk(b)] = rk(c)
   void emitSetTabUp(int line, int a, int b, int c) {
-    emitABC(line, OpCodeKind.SETTABUP, a, b, c);
+    emitABC(line, OpCodeKind.setTabUp, a, b, c);
   }
 
 // r[a], ..., r[a+c-2] = r[a](r[a+1], ..., r[a+b-1])
   void emitCall(int line, int a, int nArgs, int nRet) {
-    emitABC(line, OpCodeKind.CALL, a, nArgs + 1, nRet + 1);
+    emitABC(line, OpCodeKind.call, a, nArgs + 1, nRet + 1);
   }
 
 // return r[a](r[a+1], ... ,r[a+b-1])
   void emitTailCall(int line, int a, int nArgs) {
-    emitABC(line, OpCodeKind.TAILCALL, a, nArgs + 1, 0);
+    emitABC(line, OpCodeKind.tailCall, a, nArgs + 1, 0);
   }
 
 // return r[a], ... ,r[a+b-2]
   void emitReturn(int line, int a, int n) {
-    emitABC(line, OpCodeKind.RETURN, a, n + 1, 0);
+    emitABC(line, OpCodeKind.opReturn, a, n + 1, 0);
   }
 
 // r[a+1] = r[b]; r[a] = r[b][rk(c)]
   void emitSelf(int line, int a, int b, int c) {
-    emitABC(line, OpCodeKind.SELF, a, b, c);
+    emitABC(line, OpCodeKind.self, a, b, c);
   }
 
 // pc+=sBx; if (a) close all upvalues >= r[a - 1]
   int emitJmp(int line, int a, int sBx) {
-    emitAsBx(line, OpCodeKind.JMP, a, sBx);
+    emitAsBx(line, OpCodeKind.jmp, a, sBx);
     return insts.length - 1;
   }
 
 // if not (r[a] <=> c) then pc++
   void emitTest(int line, int a, int c) {
-    emitABC(line, OpCodeKind.TEST, a, 0, c);
+    emitABC(line, OpCodeKind.test, a, 0, c);
   }
 
 // if (r[b] <=> c) then r[a] = r[b] else pc++
   void emitTestSet(int line, int a, int b, int c) {
-    emitABC(line, OpCodeKind.TESTSET, a, b, c);
+    emitABC(line, OpCodeKind.testSet, a, b, c);
   }
 
   int emitForPrep(int line, int a, int sBx) {
-    emitAsBx(line, OpCodeKind.FORPREP, a, sBx);
+    emitAsBx(line, OpCodeKind.forPrep, a, sBx);
     return insts.length - 1;
   }
 
   int emitForLoop(int line, int a, int sBx) {
-    emitAsBx(line, OpCodeKind.FORLOOP, a, sBx);
+    emitAsBx(line, OpCodeKind.forLoop, a, sBx);
     return insts.length - 1;
   }
 
   void emitTForCall(int line, int a, int c) {
-    emitABC(line, OpCodeKind.TFORCALL, a, 0, c);
+    emitABC(line, OpCodeKind.tForCall, a, 0, c);
   }
 
   void emitTForLoop(int line, int a, int sBx) {
-    emitAsBx(line, OpCodeKind.TFORLOOP, a, sBx);
+    emitAsBx(line, OpCodeKind.tForLoop, a, sBx);
   }
 
 // r[a] = op r[b]
   void emitUnaryOp(int line, TokenKind op, int? a, int? b) {
     switch (op) {
-      case TokenKind.TOKEN_OP_NOT:
-        emitABC(line, OpCodeKind.NOT, a!, b!, 0);
+      case TokenKind.opNot:
+        emitABC(line, OpCodeKind.not, a!, b!, 0);
         break;
-      case TokenKind.TOKEN_OP_BNOT:
-        emitABC(line, OpCodeKind.BNOT, a!, b!, 0);
+      case TokenKind.opBNot:
+        emitABC(line, OpCodeKind.bNot, a!, b!, 0);
         break;
-      case TokenKind.TOKEN_OP_LEN:
-        emitABC(line, OpCodeKind.LEN, a!, b!, 0);
+      case TokenKind.opLen:
+        emitABC(line, OpCodeKind.len, a!, b!, 0);
         break;
-      case TokenKind.TOKEN_OP_UNM:
-        emitABC(line, OpCodeKind.UNM, a!, b!, 0);
+      case TokenKind.opUnm:
+        emitABC(line, OpCodeKind.unm, a!, b!, 0);
         break;
       default:
     }
@@ -466,23 +465,23 @@ class FuncInfo {
       emitABC(line, arithAndBitwiseBinops[op]!, a!, b!, c!);
     } else {
       switch (op) {
-        case TokenKind.TOKEN_OP_EQ:
-          emitABC(line, OpCodeKind.EQ, 1, b!, c!);
+        case TokenKind.opEq:
+          emitABC(line, OpCodeKind.eq, 1, b!, c!);
           break;
-        case TokenKind.TOKEN_OP_NE:
-          emitABC(line, OpCodeKind.EQ, 0, b!, c!);
+        case TokenKind.opNe:
+          emitABC(line, OpCodeKind.eq, 0, b!, c!);
           break;
-        case TokenKind.TOKEN_OP_LT:
-          emitABC(line, OpCodeKind.LT, 1, b!, c!);
+        case TokenKind.opLt:
+          emitABC(line, OpCodeKind.lt, 1, b!, c!);
           break;
-        case TokenKind.TOKEN_OP_GT:
-          emitABC(line, OpCodeKind.LT, 1, c!, b!);
+        case TokenKind.opGt:
+          emitABC(line, OpCodeKind.lt, 1, c!, b!);
           break;
-        case TokenKind.TOKEN_OP_LE:
-          emitABC(line, OpCodeKind.LE, 1, b!, c!);
+        case TokenKind.opLe:
+          emitABC(line, OpCodeKind.le, 1, b!, c!);
           break;
-        case TokenKind.TOKEN_OP_GE:
-          emitABC(line, OpCodeKind.LE, 1, c!, b!);
+        case TokenKind.opGe:
+          emitABC(line, OpCodeKind.le, 1, c!, b!);
           break;
         default:
       }

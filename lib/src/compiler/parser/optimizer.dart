@@ -32,15 +32,15 @@ class Optimizer {
       int? j = castToInteger(exp.exp2);
       if (j != null) {
         switch (exp.op) {
-          case TokenKind.TOKEN_OP_BAND:
+          case TokenKind.opBand:
             return IntegerExp(exp.line, i & j);
-          case TokenKind.TOKEN_OP_BOR:
+          case TokenKind.opBor:
             return IntegerExp(exp.line, i | j);
-          case TokenKind.TOKEN_OP_BXOR:
+          case TokenKind.opBXor:
             return IntegerExp(exp.line, i ^ j);
-          case TokenKind.TOKEN_OP_SHL:
+          case TokenKind.opShl:
             return IntegerExp(exp.line, LuaMath.shiftLeft(i, j));
-          case TokenKind.TOKEN_OP_SHR:
+          case TokenKind.opShr:
             return IntegerExp(exp.line, LuaMath.shiftRight(i, j));
           default:
         }
@@ -56,19 +56,19 @@ class Optimizer {
       IntegerExp x = exp.exp1 as IntegerExp;
       IntegerExp y = exp.exp2 as IntegerExp;
       switch (exp.op) {
-        case TokenKind.TOKEN_OP_ADD:
+        case TokenKind.opAdd:
           return IntegerExp(exp.line, x.val+ y.val);
-        case TokenKind.TOKEN_OP_SUB:
+        case TokenKind.opSub:
           return IntegerExp(exp.line, x.val- y.val);
-        case TokenKind.TOKEN_OP_MUL:
+        case TokenKind.opMul:
           return IntegerExp(exp.line, x.val* y.val);
-        case TokenKind.TOKEN_OP_IDIV:
+        case TokenKind.opIDiv:
           if (y.val != 0) {
             return IntegerExp(
                 exp.line, (x.val/y.val).floor());
           }
           break;
-        case TokenKind.TOKEN_OP_MOD:
+        case TokenKind.opMod:
           if (y.val != 0) {
             return IntegerExp(
                 exp.line, LuaMath.iFloorMod(x.val, y.val));
@@ -83,23 +83,23 @@ class Optimizer {
       double? g = castToFloat(exp.exp2);
       if (g != null) {
         switch (exp.op) {
-          case TokenKind.TOKEN_OP_ADD:
+          case TokenKind.opAdd:
             return FloatExp(exp.line, f + g);
-          case TokenKind.TOKEN_OP_SUB:
+          case TokenKind.opSub:
             return FloatExp(exp.line, f - g);
-          case TokenKind.TOKEN_OP_MUL:
+          case TokenKind.opMul:
             return FloatExp(exp.line, f * g);
-          case TokenKind.TOKEN_OP_POW:
+          case TokenKind.opPow:
             return FloatExp(exp.line, math.pow(f, g) as double);
           default:
         }
         if (g != 0) {
           switch (exp.op) {
-            case TokenKind.TOKEN_OP_DIV:
+            case TokenKind.opDiv:
               return FloatExp(exp.line, f / g);
-            case TokenKind.TOKEN_OP_IDIV:
+            case TokenKind.opIDiv:
               return FloatExp(exp.line, LuaMath.floorDiv(f, g));
-            case TokenKind.TOKEN_OP_MOD:
+            case TokenKind.opMod:
               return FloatExp(exp.line, LuaMath.floorMod(f, g));
             default:
           }
@@ -114,7 +114,7 @@ class Optimizer {
   static Exp optimizePow(Exp exp) {
     if (exp is BinopExp) {
       BinopExp binopExp = exp;
-      if (binopExp.op == TokenKind.TOKEN_OP_POW) {
+      if (binopExp.op == TokenKind.opPow) {
         binopExp.exp2 = optimizePow(binopExp.exp2);
       }
       return optimizeArithBinaryOp(binopExp);
@@ -124,11 +124,11 @@ class Optimizer {
 
   static Exp optimizeUnaryOp(UnopExp exp) {
     switch (exp.op) {
-      case TokenKind.TOKEN_OP_UNM:
+      case TokenKind.opUnm:
         return optimizeUnm(exp);
-      case TokenKind.TOKEN_OP_NOT:
+      case TokenKind.opNot:
         return optimizeNot(exp);
-      case TokenKind.TOKEN_OP_BNOT:
+      case TokenKind.opBNot:
         return optimizeBnot(exp);
       default:
         return exp;

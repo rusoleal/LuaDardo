@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import '../api/lua_state.dart';
 import '../api/lua_type.dart';
@@ -179,7 +178,7 @@ class BasicLib {
     if (chunk != null) {
       /* loading a string? */
       var chunkName = ls.optString(2, chunk);
-      ThreadStatus status = ls.load(utf8.encode(chunk) as Uint8List, chunkName!, mode);
+      ThreadStatus status = ls.load(utf8.encode(chunk), chunkName!, mode);
       return loadAux(ls, status, env);
     } else {
       /* loading from a reader function */

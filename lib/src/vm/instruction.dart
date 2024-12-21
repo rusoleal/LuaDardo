@@ -2,8 +2,8 @@ import 'opcodes.dart';
 
 class Instruction {
 
-   static final int maxArg_bx = (1 << 18) - 1;   // 2^18-1 = 262143
-   static final int maxArg_sbx = maxArg_bx >> 1; // 262143/2 = 131071
+   static final int maxArgBx = (1 << 18) - 1;   // 2^18-1 = 262143
+   static final int maxArgSbx = maxArgBx >> 1; // 262143/2 = 131071
 
 
    /*
@@ -41,7 +41,7 @@ class Instruction {
   }
 
    static int getSBx(int i) {
-    return getBx(i) - maxArg_sbx;
+    return getBx(i) - maxArgSbx;
   }
 
    static int getAx(int i) {

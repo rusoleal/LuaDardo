@@ -14,7 +14,7 @@ class PrefixExpParser {
     */
   static Exp parsePrefixExp(Lexer lexer) {
     Exp exp;
-    if (lexer.LookAhead() == TokenKind.TOKEN_IDENTIFIER) {
+    if (lexer.lookAhead() == TokenKind.identifier) {
       Token id = lexer.nextIdentifier(); // Name
       exp = NameExp(id.line, id.value);
     } else { // ‘(’ exp ‘)’
@@ -24,9 +24,9 @@ class PrefixExpParser {
   }
 
   static Exp parseParensExp(Lexer lexer) {
-    lexer.nextTokenOfKind(TokenKind.TOKEN_SEP_LPAREN); // (
+    lexer.nextTokenOfKind(TokenKind.sepLParen); // (
     Exp exp = ExpParser.parseExp(lexer);               // exp
-    lexer.nextTokenOfKind(TokenKind.TOKEN_SEP_RPAREN); // )
+    lexer.nextTokenOfKind(TokenKind.sepRParen); // )
 
     if (exp is VarargExp
     || exp is FuncCallExp
@@ -41,25 +41,25 @@ class PrefixExpParser {
 
   static Exp finishPrefixExp(Lexer lexer, Exp exp) {
     while (true) {
-      switch (lexer.LookAhead()) {
-        case TokenKind.TOKEN_SEP_LBRACK: { // prefixexp ‘[’ exp ‘]’
+      switch (lexer.lookAhead()) {
+        case TokenKind.sepLBrack: { // prefixexp ‘[’ exp ‘]’
           lexer.nextToken();                       // ‘[’
           Exp keyExp = ExpParser.parseExp(lexer);            // exp
-          lexer.nextTokenOfKind(TokenKind.TOKEN_SEP_RBRACK); // ‘]’
+          lexer.nextTokenOfKind(TokenKind.sepRBrack); // ‘]’
           exp = TableAccessExp(lexer.line, exp, keyExp);
           break;
         }
-        case TokenKind.TOKEN_SEP_DOT: { // prefixexp ‘.’ Name
+        case TokenKind.sepDot: { // prefixexp ‘.’ Name
           lexer.nextToken();                   // ‘.’
           Token name = lexer.nextIdentifier(); // Name
           Exp keyExp = StringExp.fromToken(name);
           exp = TableAccessExp(name.line, exp, keyExp);
           break;
         }
-        case TokenKind.TOKEN_SEP_COLON: // prefixexp ‘:’ Name args
-        case TokenKind.TOKEN_SEP_LPAREN:
-        case TokenKind.TOKEN_SEP_LCURLY:
-        case TokenKind.TOKEN_STRING: // prefixexp args
+        case TokenKind.sepColon: // prefixexp ‘:’ Name args
+        case TokenKind.sepLParen:
+        case TokenKind.sepLCurly:
+        case TokenKind.string: // prefixexp args
           exp = finishFuncCallExp(lexer, exp);
           break;
         default:
@@ -81,7 +81,7 @@ class PrefixExpParser {
   }
 
   static StringExp? parseNameExp(Lexer lexer) {
-    if (lexer.LookAhead() == TokenKind.TOKEN_SEP_COLON) {
+    if (lexer.lookAhead() == TokenKind.sepColon) {
       lexer.nextToken();
       Token name = lexer.nextIdentifier();
       return StringExp.fromToken(name);
@@ -91,19 +91,19 @@ class PrefixExpParser {
 
   // args ::=  ‘(’ [explist] ‘)’ | tableconstructor | LiteralString
   static List<Exp> parseArgs(Lexer lexer) {
-    switch (lexer.LookAhead()) {
-      case TokenKind.TOKEN_SEP_LPAREN: // ‘(’ [explist] ‘)’
+    switch (lexer.lookAhead()) {
+      case TokenKind.sepLParen: // ‘(’ [explist] ‘)’
         lexer.nextToken(); // TOKEN_SEP_LPAREN
         List<Exp>? args;
-        if (lexer.LookAhead() != TokenKind.TOKEN_SEP_RPAREN) {
+        if (lexer.lookAhead() != TokenKind.sepRParen) {
           args = ExpParser.parseExpList(lexer);
         }
-        lexer.nextTokenOfKind(TokenKind.TOKEN_SEP_RPAREN);
+        lexer.nextTokenOfKind(TokenKind.sepRParen);
         return args ?? List<Exp>.empty();
-      case TokenKind.TOKEN_SEP_LCURLY: // ‘{’ [fieldlist] ‘}’
+      case TokenKind.sepLCurly: // ‘{’ [fieldlist] ‘}’
         return <Exp>[ExpParser.parseTableConstructorExp(lexer)];
       default: // LiteralString
-        Token str = lexer.nextTokenOfKind(TokenKind.TOKEN_STRING);
+        Token str = lexer.nextTokenOfKind(TokenKind.string);
         return <Exp>[StringExp.fromToken(str)];
     }
   }

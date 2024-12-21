@@ -125,8 +125,11 @@ class OSLib {
   static int _getYearDay(DateTime date){
     var monthDay = [31,28,31,30,31,30,31,31,30,31,30,31];
 
-    if(date.year%4==0 && date.year%100!=0) monthDay[1] = 29;
-    else if(date.year%400==0) monthDay[1] = 29;
+    if(date.year%4==0 && date.year%100!=0) {
+      monthDay[1] = 29;
+    } else if(date.year%400==0) {
+      monthDay[1] = 29;
+    }
 
     int sum=0;
     for(var i = 0;i<=date.month-2;i++){

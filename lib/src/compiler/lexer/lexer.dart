@@ -16,11 +16,11 @@ class Lexer {
   Token? cachedNextToken;
   int? lineBackup;
 
-  StringBuffer _buff = StringBuffer();
+  final StringBuffer _buff = StringBuffer();
 
-  Lexer(this.chunk,this.chunkName):this.line=1;
+  Lexer(this.chunk,this.chunkName):line=1;
 
-  TokenKind LookAhead() {
+  TokenKind lookAhead() {
     if (cachedNextToken == null) {
       lineBackup = line;
       cachedNextToken = nextToken();
@@ -37,7 +37,7 @@ class Lexer {
   }
 
   Token nextIdentifier() {
-    return nextTokenOfKind(TokenKind.TOKEN_IDENTIFIER);
+    return nextTokenOfKind(TokenKind.identifier);
   }
 
   Token nextToken() {
@@ -49,122 +49,124 @@ class Lexer {
 
     skipWhiteSpaces();
     if (chunk.length <= 0) {
-      return Token(line, TokenKind.TOKEN_EOF, "EOF");
+      return Token(line, TokenKind.eof, "EOF");
     }
 
     _buff.clear();
     switch (chunk.current) {
-      case ';': chunk.next(1); return  Token(line, TokenKind.TOKEN_SEP_SEMI,   ";");
-      case ',': chunk.next(1); return  Token(line, TokenKind.TOKEN_SEP_COMMA,  ",");
-      case '(': chunk.next(1); return  Token(line, TokenKind.TOKEN_SEP_LPAREN, "(");
-      case ')': chunk.next(1); return  Token(line, TokenKind.TOKEN_SEP_RPAREN, ")");
-      case ']': chunk.next(1); return  Token(line, TokenKind.TOKEN_SEP_RBRACK, "]");
-      case '{': chunk.next(1); return  Token(line, TokenKind.TOKEN_SEP_LCURLY, "{");
-      case '}': chunk.next(1); return  Token(line, TokenKind.TOKEN_SEP_RCURLY, "}");
-      case '+': chunk.next(1); return  Token(line, TokenKind.TOKEN_OP_ADD,     "+");
-      case '-': chunk.next(1); return  Token(line, TokenKind.TOKEN_OP_MINUS,   "-");
-      case '*': chunk.next(1); return  Token(line, TokenKind.TOKEN_OP_MUL,     "*");
-      case '^': chunk.next(1); return  Token(line, TokenKind.TOKEN_OP_POW,     "^");
-      case '%': chunk.next(1); return  Token(line, TokenKind.TOKEN_OP_MOD,     "%");
-      case '&': chunk.next(1); return  Token(line, TokenKind.TOKEN_OP_BAND,    "&");
-      case '|': chunk.next(1); return  Token(line, TokenKind.TOKEN_OP_BOR,     "|");
-      case '#': chunk.next(1); return  Token(line, TokenKind.TOKEN_OP_LEN,     "#");
+      case ';': chunk.next(1); return  Token(line, TokenKind.sepSemi,   ";");
+      case ',': chunk.next(1); return  Token(line, TokenKind.sepComma,  ",");
+      case '(': chunk.next(1); return  Token(line, TokenKind.sepLParen, "(");
+      case ')': chunk.next(1); return  Token(line, TokenKind.sepRParen, ")");
+      case ']': chunk.next(1); return  Token(line, TokenKind.sepRBrack, "]");
+      case '{': chunk.next(1); return  Token(line, TokenKind.sepLCurly, "{");
+      case '}': chunk.next(1); return  Token(line, TokenKind.sepRCurly, "}");
+      case '+': chunk.next(1); return  Token(line, TokenKind.opAdd,     "+");
+      case '-': chunk.next(1); return  Token(line, TokenKind.opMinus,   "-");
+      case '*': chunk.next(1); return  Token(line, TokenKind.opMul,     "*");
+      case '^': chunk.next(1); return  Token(line, TokenKind.opPow,     "^");
+      case '%': chunk.next(1); return  Token(line, TokenKind.opMod,     "%");
+      case '&': chunk.next(1); return  Token(line, TokenKind.opBand,    "&");
+      case '|': chunk.next(1); return  Token(line, TokenKind.opBor,     "|");
+      case '#': chunk.next(1); return  Token(line, TokenKind.opLen,     "#");
       case ':':
         if (chunk.startsWith("::")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_SEP_LABEL, "::");
+          return  Token(line, TokenKind.sepLabel, "::");
         } else {
           chunk.next(1);
-          return  Token(line, TokenKind.TOKEN_SEP_COLON, ":");
+          return  Token(line, TokenKind.sepColon, ":");
         }
       case '/':
         if (chunk.startsWith("//")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_OP_IDIV, "//");
+          return  Token(line, TokenKind.opIDiv, "//");
         } else {
           chunk.next(1);
-          return  Token(line, TokenKind.TOKEN_OP_DIV, "/");
+          return  Token(line, TokenKind.opDiv, "/");
         }
       case '~':
         if (chunk.startsWith("~=")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_OP_NE, "~=");
+          return  Token(line, TokenKind.opNe, "~=");
         } else {
           chunk.next(1);
-          return  Token(line, TokenKind.TOKEN_OP_WAVE, "~");
+          return  Token(line, TokenKind.opWave, "~");
         }
       case '=':
         if (chunk.startsWith("==")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_OP_EQ, "==");
+          return  Token(line, TokenKind.opEq, "==");
         } else {
           chunk.next(1);
-          return  Token(line, TokenKind.TOKEN_OP_ASSIGN, "=");
+          return  Token(line, TokenKind.opAssign, "=");
         }
       case '<':
         if (chunk.startsWith("<<")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_OP_SHL, "<<");
+          return  Token(line, TokenKind.opShl, "<<");
         } else if (chunk.startsWith("<=")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_OP_LE, "<=");
+          return  Token(line, TokenKind.opLe, "<=");
         } else {
           chunk.next(1);
-          return  Token(line, TokenKind.TOKEN_OP_LT, "<");
+          return  Token(line, TokenKind.opLt, "<");
         }
       case '>':
         if (chunk.startsWith(">>")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_OP_SHR, ">>");
+          return  Token(line, TokenKind.opShr, ">>");
         } else if (chunk.startsWith(">=")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_OP_GE, ">=");
+          return  Token(line, TokenKind.opGe, ">=");
         } else {
           chunk.next(1);
-          return  Token(line, TokenKind.TOKEN_OP_GT, ">");
+          return  Token(line, TokenKind.opGt, ">");
         }
       case '.':
         if (chunk.startsWith("...")) {
           chunk.next(3);
-          return  Token(line, TokenKind.TOKEN_VARARG, "...");
+          return  Token(line, TokenKind.vararg, "...");
         } else if (chunk.startsWith("..")) {
           chunk.next(2);
-          return  Token(line, TokenKind.TOKEN_OP_CONCAT, "..");
+          return  Token(line, TokenKind.opConcat, "..");
         } else if (chunk.length == 1) {
           chunk.next(1);
-          return  Token(line, TokenKind.TOKEN_SEP_DOT, ".");
+          return  Token(line, TokenKind.sepDot, ".");
         }else if(!CharSequence.isDigit(chunk.charAt(1))){
           chunk.next(1);
-          return  Token(line, TokenKind.TOKEN_SEP_DOT, ".");
+          return  Token(line, TokenKind.sepDot, ".");
         }else{  // is digit
-          return Token(line, TokenKind.TOKEN_NUMBER, readNumeral());
+          return Token(line, TokenKind.number, readNumeral());
         }
       case '[':  // long string or simply '['
-        int sep = _skip_sep();
+        int sep = _skipSep();
         if (sep >= 0) {
-          return Token(line, TokenKind.TOKEN_STRING, readLongString(true, sep));
-        } else if (sep == -1)
-          return Token(line, TokenKind.TOKEN_SEP_LBRACK, "[");
-        else error("invalid long string delimiter");
+          return Token(line, TokenKind.string, readLongString(true, sep));
+        } else if (sep == -1) {
+          return Token(line, TokenKind.sepLBrack, "[");
+        } else { 
+          error("invalid long string delimiter"); 
+        }
 
         break;
       case '\'':
       case '"':
-        return  Token(line, TokenKind.TOKEN_STRING, readString());
+        return  Token(line, TokenKind.string, readString());
     }
 
     if (CharSequence.isDigit(chunk.current)) {
-      return Token(line, TokenKind.TOKEN_NUMBER, readNumeral());
+      return Token(line, TokenKind.number, readNumeral());
     }
 
     if (chunk.current == '_' || CharSequence.isLetter(chunk.current)) {
       do {
-        _save_and_next();
+        _saveAndNext();
       } while (CharSequence.isalnum(chunk.current) || chunk.current == '_');
       String id = _buff.toString();
       return keywords.containsKey(id)
           ?  Token(line, keywords[id], id)
-          :  Token(line, TokenKind.TOKEN_IDENTIFIER, id);
+          :  Token(line, TokenKind.identifier, id);
     }
 
     return error("unexpected symbol near ${chunk.current}");
@@ -193,7 +195,7 @@ class Lexer {
 
     // long comment ?
     if (chunk.startsWith("[")) {
-      int sep = _skip_sep();
+      int sep = _skipSep();
       _buff.clear(); /* `skip_sep' 可能会弄脏缓冲区 */
       if (sep >= 0) {
         readLongString(false, sep);  /* long comment */
@@ -212,11 +214,11 @@ class Lexer {
     _buff.write(chunk.current);
   }
 
-  void _save_c(int c) {
+  void _saveC(int c) {
     _buff.writeCharCode(c);
   }
 
-  void _save_and_next(){
+  void _saveAndNext(){
     _save();
     chunk.next(1);
   }
@@ -234,7 +236,7 @@ class Lexer {
 
   String readString() {
     String del = chunk.current;
-    _save_and_next();
+    _saveAndNext();
     while (chunk.current != del) {
       switch (chunk.current) {
         // EOZ
@@ -273,41 +275,50 @@ class Lexer {
               case 'x': // '\xXX'
                 var hex = chunk.substring(1, 3);
                 if(CharSequence.isxDigit(hex)){
-                  _save_c(int.parse(hex, radix: 16));
+                  _saveC(int.parse(hex, radix: 16));
                   chunk.next(3);
                   continue;
-                }else error("hexadecimal digit expected");
+                } else { 
+                  error("hexadecimal digit expected"); 
+                }
                 break;
               case 'u': // '\u{XXX}'
                 chunk.next(1);
                 if(chunk.current != '{') error("missing '{'");
 
                 int j = 1;
-                while(CharSequence.isxDigit(chunk.charAt(j))) j++;
+                while(CharSequence.isxDigit(chunk.charAt(j))) {
+                  j++;
+                }
 
                 if(chunk.charAt(j) != '}') error("missing '}'");
                 var seq = chunk.substring(1, j);
                 int d = int.parse(seq, radix: 16);
                 if (d <= 0x10FFFF) {
-                  _save_c(d);
+                  _saveC(d);
                   chunk.next(j+1);
-                }else error("UTF-8 value too large near '$seq'");
+                } else { 
+                  error("UTF-8 value too large near '$seq'"); 
+                }
                 continue;
               case '\n': case '\r':
-                _save_c(10); // write '\n'
+                _saveC(10); // write '\n'
                 _incLineNumber();
                 continue;
               case '\\': case '"': case '\'':
-                _save_and_next();
+                _saveAndNext();
                 continue;
               case '': // EOZ
                 continue; // will raise an error next loop
               case 'z':    // zap following span of spaces
                 chunk.next(1);
-                while (chunk.length > 0 &&
-                    CharSequence.isWhiteSpace(chunk.current)) {
-                  if(CharSequence.isNewLine(chunk.current)) _incLineNumber();
-                  else chunk.next(1);
+                while (chunk.length > 0 && CharSequence.isWhiteSpace(chunk.current)) {
+                  if(CharSequence.isNewLine(chunk.current)) { 
+                    _incLineNumber(); 
+                  }
+                  else { 
+                    chunk.next(1); 
+                  }
                 }
                 continue;
               default:
@@ -320,27 +331,29 @@ class Lexer {
                     c = 10 * c + (chunk.current - '0') as int;
                       chunk.next(1);
                   }
-                  _save_c(c);
+                  _saveC(c);
                 }
                 continue;
             }
-            _save_c(c);
+            _saveC(c);
             chunk.next(1);
             continue;
           }
         default:
-          _save_and_next();
+          _saveAndNext();
       }
     }
-    _save_and_next(); // 跳过分隔符
+    _saveAndNext(); // 跳过分隔符
     var rawToken = _buff.toString();
     return rawToken.substring(1, rawToken.length - 1);
   }
 
   String readLongString(bool isString, int sep) {
-    _save_and_next(); /* skip 2nd `[' */
-    if (CharSequence.isNewLine(chunk.current)) /* string starts with a newline? */
+    _saveAndNext(); /* skip 2nd `[' */
+    if (CharSequence.isNewLine(chunk.current)) {
+      /* string starts with a newline? */
       _incLineNumber();
+    }
     /* skip it */
     loop:
     for (;;) {
@@ -350,41 +363,43 @@ class Lexer {
               isString ? "unfinished long string" : "unfinished long comment");
           break;
         case ']':
-          if (_skip_sep() == sep) {
-            _save_and_next(); /* skip 2nd `]' */
+          if (_skipSep() == sep) {
+            _saveAndNext(); /* skip 2nd `]' */
             break loop;
           }
           break;
 
         case '\n':
         case '\r':
-          _save_c(10); // write '\n'
+          _saveC(10); // write '\n'
           _incLineNumber();
           if (!isString) _buff.clear();
           break;
         default:
-          if (isString)
-            _save_and_next();
-          else
-            chunk.next(1);
+          if (isString) {
+            _saveAndNext();
+          } else {
+            chunk.next(1); 
+          }
       }
     }
     /* loop */
     if (isString) {
       var rawToken = _buff.toString();
-      int trim_by = 2 + sep;
-      return rawToken.substring(trim_by, rawToken.length - trim_by);
-    } else
-      return '';
+      int trimBy = 2 + sep;
+      return rawToken.substring(trimBy, rawToken.length - trimBy);
+    } else {
+      return ''; 
+    }
   }
 
-  int _skip_sep() {
+  int _skipSep() {
     int count = 0;
     String s = chunk.current;
     // assert(s == '[' || s == ']') ;
-    _save_and_next();
+    _saveAndNext();
     while (chunk.current == '=') {
-      _save_and_next();
+      _saveAndNext();
       count++;
     }
     return (chunk.current == s) ? count : (-count) - 1;
@@ -394,24 +409,24 @@ class Lexer {
     //print('readNumeral');
     String expo = "[Ee]";
     String first = chunk.current;
-    _save_and_next();
+    _saveAndNext();
     if (first == '0' && chunk.startsWithRegexp(RegExp("[xX]"))) {
       /* hexadecimal? */
       expo = "[Pp]";
-      _save_and_next();
+      _saveAndNext();
     }
 
     for (;;) {
       if (chunk.startsWithRegexp(RegExp(expo))) {
         /* exponent part? */
-        _save_and_next();
-        if (chunk.startsWithRegexp(RegExp("[-\+]"))) {
+        _saveAndNext();
+        if (chunk.startsWithRegexp(RegExp("[-+]"))) {
           /* optional exponent sign */
-          _save_and_next();
+          _saveAndNext();
         }
       }
       if (CharSequence.isxDigit(chunk.current) || chunk.current == '.') {
-        _save_and_next();
+        _saveAndNext();
       }
       else  {
         break;

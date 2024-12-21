@@ -10,7 +10,7 @@ class Parser{
   static Block parse(String chunk, String chunkName) {
     Lexer lexer = Lexer(CharSequence(chunk), chunkName);
     Block block = BlockParser.parseBlock(lexer);
-    lexer.nextTokenOfKind(TokenKind.TOKEN_EOF);
+    lexer.nextTokenOfKind(TokenKind.eof);
     return block;
   }
 }

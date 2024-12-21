@@ -45,13 +45,13 @@ class LuaStateImpl implements LuaState, LuaVM {
 
   /// 压入调用栈帧
   void _pushLuaStack(LuaStack newTop) {
-    newTop.prev = this._stack;
-    this._stack = newTop;
+    newTop.prev = _stack;
+    _stack = newTop;
   }
 
   void _popLuaStack() {
-    LuaStack top = this._stack!;
-    this._stack = top.prev;
+    LuaStack top = _stack!;
+    _stack = top.prev;
     top.prev = null;
   }
 
@@ -80,14 +80,12 @@ class LuaStateImpl implements LuaState, LuaVM {
 
   Object? _getMetafield(Object? val, String fieldName) {
     LuaTable? mt = _getMetatable(val);
-    return mt != null ? mt.get(fieldName) : null;
+    return mt?.get(fieldName);
   }
 
   Object? getMetamethod(Object? a, Object? b, String mmName) {
     Object? mm = _getMetafield(a, mmName);
-    if (mm == null) {
-      mm = _getMetafield(b, mmName);
-    }
+    mm ??= _getMetafield(b, mmName);
     return mm;
   }
 
@@ -266,7 +264,7 @@ class LuaStateImpl implements LuaState, LuaVM {
   @override
   int toInteger(int idx) {
     int? i = toIntegerX(idx);
-    return i == null ? 0 : i;
+    return i ?? 0;
   }
 
   @override
@@ -278,7 +276,7 @@ class LuaStateImpl implements LuaState, LuaVM {
   @override
   double toNumber(int idx) {
     double? n = toNumberX(idx);
-    return n == null ? 0 : n;
+    return n ?? 0;
   }
 
   @override
@@ -611,7 +609,7 @@ class LuaStateImpl implements LuaState, LuaVM {
 
   void _callDartClosure(int nArgs, int nResults, Closure c) {
     // create new lua stack
-    LuaStack newStack = new LuaStack(/*nRegs+LUA_MINSTACK*/);
+    LuaStack newStack = LuaStack(/*nRegs+LUA_MINSTACK*/);
     newStack.state = this;
     newStack.closure = c;
 
@@ -652,7 +650,7 @@ class LuaStateImpl implements LuaState, LuaVM {
         : Compiler.compile(utf8.decode(chunk), chunkName);
     Closure closure = Closure(proto);
     _stack!.push(closure);
-    if (proto.upvalues.length > 0) {
+    if (proto.upvalues.isNotEmpty) {
       Object? env = registry!.get(luaRidxGlobals);
       closure.upvals[0] = UpvalueHolder.value(env); // todo
     }
@@ -818,7 +816,7 @@ class LuaStateImpl implements LuaState, LuaVM {
       return ThreadStatus.luaOk;
     } catch (e) {
       if (msgh != 0) {
-        throw e;
+        rethrow;
       }
       while (_stack != caller) {
         _popLuaStack();
@@ -893,7 +891,7 @@ class LuaStateImpl implements LuaState, LuaVM {
     } else {
       typeArg = typeName2(arg); /* standard name */
     }
-    String msg = tname + " expected, got " + typeArg!;
+    String msg = "$tname expected, got ${typeArg!}";
     pushString(msg);
     argError(arg, msg);
   }
@@ -1008,7 +1006,7 @@ class LuaStateImpl implements LuaState, LuaVM {
   ThreadStatus loadFileX(String? filename, String? mode) {
     try {
       File file = File(filename!);
-      return load(file.readAsBytesSync(), "@" + filename, mode);
+      return load(file.readAsBytesSync(), "@$filename", mode);
     } catch (e, s) {
       print(e);
       print(s);
@@ -1018,7 +1016,7 @@ class LuaStateImpl implements LuaState, LuaVM {
 
   @override
   ThreadStatus loadString(String s) {
-    return load(utf8.encode(s) as Uint8List, s, "bt");
+    return load(utf8.encode(s), s, "bt");
   }
 
   @override
@@ -1193,29 +1191,31 @@ class LuaStateImpl implements LuaState, LuaVM {
     return true;
   }
 
+  @override
   int ref(int t) {
-    int _ref;
+    int refValue;
     if (isNil(-1)) {
       pop(1); /* remove from stack */
       return -1; /* 'nil' has a unique fixed reference */
     }
     t = absIndex(t);
     rawGetI(t, 0); /* get first free element */
-    _ref = toInteger(-1); /* ref = t[freelist] */
+    refValue = toInteger(-1); /* ref = t[freelist] */
     pop(1); /* remove it from stack */
-    if (_ref != 0) {
+    if (refValue != 0) {
       /* any free element? */
-      rawGetI(t, _ref); /* remove it from list */
+      rawGetI(t, refValue); /* remove it from list */
       rawSetI(t, 0); /* (t[freelist] = t[ref]) */
-    } else
+    } else {
       /* no free elements */
-      _ref = rawLen(t) + 1;
-    /* get a new reference */
-
-    rawSetI(t, _ref);
-    return _ref;
+      refValue = rawLen(t) + 1;
+      /* get a new reference */
+    }
+    rawSetI(t, refValue);
+    return refValue;
   }
 
+  @override
   void unRef(int t, int ref) {
     if (ref >= 0) {
       t = absIndex(t);
@@ -1271,7 +1271,7 @@ class LuaStateImpl implements LuaState, LuaVM {
       int? uvIdx = uvInfo.idx;
       if (uvInfo.instack == 1) {
         if (_stack!.openuvs == null) {
-          _stack!.openuvs = Map<int?, UpvalueHolder?>();
+          _stack!.openuvs = {};
         }
         if (_stack!.openuvs!.containsKey(uvIdx)) {
           closure.upvals[i] = _stack!.openuvs![uvIdx];
@@ -1287,10 +1287,9 @@ class LuaStateImpl implements LuaState, LuaVM {
 
   @override
   void loadVararg(int n) {
-    List<Object?>? varargs =
-        _stack!.varargs != null ? _stack!.varargs : const <Object>[];
+    List<Object?>? varargs = _stack!.varargs ?? const <Object>[];
     if (n < 0) {
-      n = varargs!.length;
+      n = varargs.length;
     }
 
     //stack.check(n)
@@ -1309,8 +1308,9 @@ class LuaStateImpl implements LuaState, LuaVM {
         if (v!.index! >= a - 1) {
           v.migrate();
           return true;
-        } else
+        } else {
           return false;
+        }
       });
     }
   }

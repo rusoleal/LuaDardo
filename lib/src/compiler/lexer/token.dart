@@ -1,93 +1,93 @@
 enum TokenKind {
-  TOKEN_EOF        , // end-of-file
-  TOKEN_VARARG     , // ...
-  TOKEN_SEP_SEMI   , // ;
-  TOKEN_SEP_COMMA  , // ,
-  TOKEN_SEP_DOT    , // .
-  TOKEN_SEP_COLON  , // :
-  TOKEN_SEP_LABEL  , // ::
-  TOKEN_SEP_LPAREN , // (
-  TOKEN_SEP_RPAREN , // )
-  TOKEN_SEP_LBRACK , // [
-  TOKEN_SEP_RBRACK , // ]
-  TOKEN_SEP_LCURLY , // {
-  TOKEN_SEP_RCURLY , // }
-  TOKEN_OP_ASSIGN  , // =
-  TOKEN_OP_MINUS   , // - (sub or unm)
-  TOKEN_OP_WAVE    , // ~ (bnot or bxor)
-  TOKEN_OP_ADD     , // +
-  TOKEN_OP_MUL     , // *
-  TOKEN_OP_DIV     , // /
-  TOKEN_OP_IDIV    , // //
-  TOKEN_OP_POW     , // ^
-  TOKEN_OP_MOD     , // %
-  TOKEN_OP_BAND    , // &
-  TOKEN_OP_BOR     , // |
-  TOKEN_OP_SHR     , // >>
-  TOKEN_OP_SHL     , // <<
-  TOKEN_OP_CONCAT  , // ..
-  TOKEN_OP_LT      , // <
-  TOKEN_OP_LE      , // <=
-  TOKEN_OP_GT      , // >
-  TOKEN_OP_GE      , // >=
-  TOKEN_OP_EQ      , // ==
-  TOKEN_OP_NE      , // ~=
-  TOKEN_OP_LEN     , // #
-  TOKEN_OP_AND     , // and
-  TOKEN_OP_OR      , // or
-  TOKEN_OP_NOT     , // not
-  TOKEN_KW_BREAK   , // break
-  TOKEN_KW_DO      , // do
-  TOKEN_KW_ELSE    , // else
-  TOKEN_KW_ELSEIF  , // elseif
-  TOKEN_KW_END     , // end
-  TOKEN_KW_FALSE   , // false
-  TOKEN_KW_FOR     , // for
-  TOKEN_KW_FUNCTION, // function
-  TOKEN_KW_GOTO    , // goto
-  TOKEN_KW_IF      , // if
-  TOKEN_KW_IN      , // in
-  TOKEN_KW_LOCAL   , // local
-  TOKEN_KW_NIL     , // nil
-  TOKEN_KW_REPEAT  , // repeat
-  TOKEN_KW_RETURN  , // return
-  TOKEN_KW_THEN    , // then
-  TOKEN_KW_TRUE    , // true
-  TOKEN_KW_UNTIL   , // until
-  TOKEN_KW_WHILE   , // while
-  TOKEN_IDENTIFIER , // identifier
-  TOKEN_NUMBER     , // number literal
-  TOKEN_STRING     , // string literal
-  TOKEN_OP_UNM     , // = TOKEN_OP_MINUS // unary minus
-  TOKEN_OP_SUB     , // = TOKEN_OP_MINUS
-  TOKEN_OP_BNOT    , // = TOKEN_OP_WAVE
-  TOKEN_OP_BXOR    , // = TOKEN_OP_WAVE
+  eof         , // end-of-file
+  vararg     , // ...
+  sepSemi   , // ;
+  sepComma  , // ,
+  sepDot    , // .
+  sepColon  , // :
+  sepLabel  , // ::
+  sepLParen , // (
+  sepRParen , // )
+  sepLBrack , // [
+  sepRBrack , // ]
+  sepLCurly , // {
+  sepRCurly , // }
+  opAssign  , // =
+  opMinus   , // - (sub or unm)
+  opWave    , // ~ (bnot or bxor)
+  opAdd     , // +
+  opMul     , // *
+  opDiv     , // /
+  opIDiv    , // //
+  opPow     , // ^
+  opMod     , // %
+  opBand    , // &
+  opBor     , // |
+  opShr     , // >>
+  opShl     , // <<
+  opConcat  , // ..
+  opLt      , // <
+  opLe      , // <=
+  opGt      , // >
+  opGe      , // >=
+  opEq      , // ==
+  opNe      , // ~=
+  opLen     , // #
+  opAnd     , // and
+  opOr      , // or
+  opNot     , // not
+  kwBreak   , // break
+  kwDo      , // do
+  kwElse    , // else
+  kwElseif  , // elseif
+  kwEnd     , // end
+  kwFalse   , // false
+  kwFor     , // for
+  kwFunction, // function
+  kwGoto    , // goto
+  kwIf      , // if
+  kwIn      , // in
+  kwLocal   , // local
+  kwNil     , // nil
+  kwRepeat  , // repeat
+  kwReturn  , // return
+  kwThen    , // then
+  kwTrue    , // true
+  kwUntil   , // until
+  kwWhile   , // while
+  identifier , // identifier
+  number     , // number literal
+  string     , // string literal
+  opUnm     , // = TOKEN_OP_MINUS // unary minus
+  opSub     , // = TOKEN_OP_MINUS
+  opBNot    , // = TOKEN_OP_WAVE
+  opBXor    , // = TOKEN_OP_WAVE
 }
 
 
-const Map keywords = const <String, TokenKind>{
-  "and": TokenKind.TOKEN_OP_AND,
-  "break": TokenKind.TOKEN_KW_BREAK,
-  "do": TokenKind.TOKEN_KW_DO,
-  "else": TokenKind.TOKEN_KW_ELSE,
-  "elseif": TokenKind.TOKEN_KW_ELSEIF,
-  "end": TokenKind.TOKEN_KW_END,
-  "false": TokenKind.TOKEN_KW_FALSE,
-  "for": TokenKind.TOKEN_KW_FOR,
-  "function": TokenKind.TOKEN_KW_FUNCTION,
-  "goto": TokenKind.TOKEN_KW_GOTO,
-  "if": TokenKind.TOKEN_KW_IF,
-  "in": TokenKind.TOKEN_KW_IN,
-  "local": TokenKind.TOKEN_KW_LOCAL,
-  "nil": TokenKind.TOKEN_KW_NIL,
-  "not": TokenKind.TOKEN_OP_NOT,
-  "or": TokenKind.TOKEN_OP_OR,
-  "repeat": TokenKind.TOKEN_KW_REPEAT,
-  "return": TokenKind.TOKEN_KW_RETURN,
-  "then": TokenKind.TOKEN_KW_THEN,
-  "true": TokenKind.TOKEN_KW_TRUE,
-  "until": TokenKind.TOKEN_KW_UNTIL,
-  "while": TokenKind.TOKEN_KW_WHILE,
+const Map keywords = <String, TokenKind>{
+  "and": TokenKind.opAnd,
+  "break": TokenKind.kwBreak,
+  "do": TokenKind.kwDo,
+  "else": TokenKind.kwElse,
+  "elseif": TokenKind.kwElseif,
+  "end": TokenKind.kwEnd,
+  "false": TokenKind.kwFalse,
+  "for": TokenKind.kwFor,
+  "function": TokenKind.kwFunction,
+  "goto": TokenKind.kwGoto,
+  "if": TokenKind.kwIf,
+  "in": TokenKind.kwIn,
+  "local": TokenKind.kwLocal,
+  "nil": TokenKind.kwNil,
+  "not": TokenKind.opNot,
+  "or": TokenKind.opOr,
+  "repeat": TokenKind.kwRepeat,
+  "return": TokenKind.kwReturn,
+  "then": TokenKind.kwThen,
+  "true": TokenKind.kwTrue,
+  "until": TokenKind.kwUntil,
+  "while": TokenKind.kwWhile,
 };
 
 

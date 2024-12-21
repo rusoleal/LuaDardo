@@ -2,7 +2,7 @@ class CharSequence {
   final String _str;
   int _pos;
 
-  CharSequence(this._str) : this._pos = 0;
+  CharSequence(this._str) : _pos = 0;
 
   @override
   String toString() {

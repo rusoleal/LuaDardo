@@ -17,9 +17,9 @@ class BlockParser {
 
   static List<Stat> parseStats(Lexer lexer) {
     List<Stat> stats = <Stat>[];
-    while (!_isReturnOrBlockEnd(lexer.LookAhead())) {
+    while (!_isReturnOrBlockEnd(lexer.lookAhead())) {
       Stat stat = StatParser.parseStat(lexer);
-      if (!(stat is EmptyStat)) {
+      if (stat is! EmptyStat) {
         stats.add(stat);
       }
     }
@@ -28,12 +28,12 @@ class BlockParser {
 
    static bool _isReturnOrBlockEnd(TokenKind? kind) {
     switch (kind) {
-      case TokenKind.TOKEN_KW_RETURN:
-      case TokenKind.TOKEN_EOF:
-      case TokenKind.TOKEN_KW_END:
-      case TokenKind.TOKEN_KW_ELSE:
-      case TokenKind.TOKEN_KW_ELSEIF:
-      case TokenKind.TOKEN_KW_UNTIL:
+      case TokenKind.kwReturn:
+      case TokenKind.eof:
+      case TokenKind.kwEnd:
+      case TokenKind.kwElse:
+      case TokenKind.kwElseif:
+      case TokenKind.kwUntil:
         return true;
       default:
         return false;
@@ -43,24 +43,24 @@ class BlockParser {
   // retstat ::= return [explist] [‘;’]
   // explist ::= exp {‘,’ exp}
    static List<Exp> parseRetExps(Lexer lexer) {
-    if (lexer.LookAhead() != TokenKind.TOKEN_KW_RETURN) {
+    if (lexer.lookAhead() != TokenKind.kwReturn) {
       return List.empty();
     }
 
     lexer.nextToken();
-    switch (lexer.LookAhead()) {
-      case TokenKind.TOKEN_EOF:
-      case TokenKind.TOKEN_KW_END:
-      case TokenKind.TOKEN_KW_ELSE:
-      case TokenKind.TOKEN_KW_ELSEIF:
-      case TokenKind.TOKEN_KW_UNTIL:
+    switch (lexer.lookAhead()) {
+      case TokenKind.eof:
+      case TokenKind.kwEnd:
+      case TokenKind.kwElse:
+      case TokenKind.kwElseif:
+      case TokenKind.kwUntil:
         return const <Exp>[];
-      case TokenKind.TOKEN_SEP_SEMI:
+      case TokenKind.sepSemi:
         lexer.nextToken();
         return const <Exp>[];
       default:
         List<Exp> exps = ExpParser.parseExpList(lexer);
-        if (lexer.LookAhead() == TokenKind.TOKEN_SEP_SEMI) {
+        if (lexer.lookAhead() == TokenKind.sepSemi) {
           lexer.nextToken();
         }
         return exps;

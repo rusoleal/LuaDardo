@@ -45,11 +45,11 @@ class Fi2Proto {
 
   static List<LocVar> getLocVars(FuncInfo fi) {
     return fi.locVars.map((locVarInfo){
-    LocVar _var = LocVar();
-    _var.varName = locVarInfo.name;
-    _var.startPC = locVarInfo.startPC;
-    _var.endPC = locVarInfo.endPC;
-    return _var;
+    LocVar varValue = LocVar();
+    varValue.varName = locVarInfo.name;
+    varValue.startPC = locVarInfo.startPC;
+    varValue.endPC = locVarInfo.endPC;
+    return varValue;
     }).toList();
   }
 

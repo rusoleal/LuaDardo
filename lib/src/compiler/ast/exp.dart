@@ -64,7 +64,7 @@ class FloatExp extends Exp {
 class StringExp extends Exp {
   String str;
 
-  StringExp.fromToken(Token token):this.str = token.value {
+  StringExp.fromToken(Token token):str = token.value {
     super.line = token.line;
 
   }
@@ -89,10 +89,10 @@ class UnopExp extends Exp {
   UnopExp(Token op, this.exp) {
     super.line = op.line;
 
-    if (op.kind == TokenKind.TOKEN_OP_MINUS) {
-      this.op = TokenKind.TOKEN_OP_UNM;
-    } else if (op.kind == TokenKind.TOKEN_OP_WAVE) {
-      this.op = TokenKind.TOKEN_OP_BNOT;
+    if (op.kind == TokenKind.opMinus) {
+      this.op = TokenKind.opUnm;
+    } else if (op.kind == TokenKind.opWave) {
+      this.op = TokenKind.opBNot;
     } else {
       this.op = op.kind;
     }
@@ -106,10 +106,10 @@ class BinopExp extends Exp {
 
   BinopExp(Token op,this.exp1,this.exp2){
     line = op.line;
-    if (op.kind == TokenKind.TOKEN_OP_MINUS) {
-      this.op = TokenKind.TOKEN_OP_SUB;
-    } else if (op.kind == TokenKind.TOKEN_OP_WAVE) {
-      this.op = TokenKind.TOKEN_OP_BXOR;
+    if (op.kind == TokenKind.opMinus) {
+      this.op = TokenKind.opSub;
+    } else if (op.kind == TokenKind.opWave) {
+      this.op = TokenKind.opBXor;
     } else {
       this.op = op.kind;
     }

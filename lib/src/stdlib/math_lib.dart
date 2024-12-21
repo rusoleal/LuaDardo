@@ -51,7 +51,7 @@ class MathLib{
   }
 
 
-  static var rng = new math.Random();
+  static var rng = math.Random();
 
   static int _random(LuaState ls) {
     var low, up;
@@ -80,7 +80,7 @@ class MathLib{
 
   static int _randomseed(LuaState ls) {
     var x = ls.checkNumber(1)!;
-    rng = new math.Random(x.floor());
+    rng = math.Random(x.floor());
     return 0;
   }
 
@@ -118,7 +118,7 @@ class MathLib{
 
   static int _log(LuaState ls){
     var x = ls.checkNumber(1);
-    var res;
+    double res;
 
     if(ls.isNoneOrNil(2)){
       res = math.log(x!);
@@ -187,14 +187,14 @@ class MathLib{
     return 1;
   }
 
-  static _pushNumInt(LuaState ls,double d) {
+  /*static _pushNumInt(LuaState ls,double d) {
     var i = d.toInt();
     if (d - i.toDouble() == 0){ /* does 'd' fit in an integer? */
       ls.pushInteger(i); /* result is integer */
     } else {
       ls.pushNumber(d);  /* result is float */
     }
-  }
+  }*/
 
   static int _ceil(LuaState ls){
     if(ls.isInteger(1)){

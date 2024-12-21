@@ -9,10 +9,10 @@ _print(int i,LuaType type,[String? value]){
 extension LuaStateDebug on LuaState {
   void printStack() {
     print(">------  stack  top  ------<");
-    var len = this.getTop();
+    var len = getTop();
     for (int i = len; i >= 1; i--) {
-      LuaType t = this.type(i);
-      switch (this.type(i)) {
+      LuaType t = type(i);
+      switch (type(i)) {
         case LuaType.luaNone:
           _print(i,t);
           break;
@@ -21,24 +21,24 @@ extension LuaStateDebug on LuaState {
           _print(i,t);
           break;
 
-        case LuaType.luaNil:
-          _print(i,t,"${this.toBoolean(i) ? "true" : "false"}");
-          break;
+        /*case LuaType.luaNil:
+          _print(i,t,toBoolean(i) ? "true" : "false");
+          break;*/
 
         case LuaType.luaLightUserdata:
           _print(i, t);
           break;
 
         case LuaType.luaNumber:
-          if (this.isInteger(i)) {
-            _print(i,t,"(integer)${this.toInteger(i)}");
-          } else if (this.isNumber(i)) {
-            _print(i,t,"${this.toNumber(i)}");
+          if (isInteger(i)) {
+            _print(i,t,"(integer)${toInteger(i)}");
+          } else if (isNumber(i)) {
+            _print(i,t,"${toNumber(i)}");
           }
           break;
 
         case LuaType.luaString:
-          _print(i,t,"${this.toStr(i)}");
+          _print(i,t,"${toStr(i)}");
           break;
 
         case LuaType.luaTable:
@@ -57,7 +57,7 @@ extension LuaStateDebug on LuaState {
           _print(i,t);
           break;
         default:
-          _print(i,t,"${this.typeName(t)}");
+          _print(i,t,typeName(t));
           break;
       }
     }

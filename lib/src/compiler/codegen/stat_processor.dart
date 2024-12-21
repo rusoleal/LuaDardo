@@ -73,7 +73,7 @@ class StatProcessor {
     int pcBeforeExp = fi.pc();
 
     int oldRegs = fi.usedRegs;
-    int a = ExpProcessor.expToOpArg(fi, node.exp, ExpProcessor.ARG_REG).arg!;
+    int a = ExpProcessor.expToOpArg(fi, node.exp, ExpProcessor.argReg).arg!;
     fi.usedRegs = oldRegs;
 
     int line = ExpHelper.lastLineOf(node.exp);
@@ -102,7 +102,7 @@ class StatProcessor {
     BlockProcessor.processBlock(fi, node.block);
 
     int oldRegs = fi.usedRegs;
-    int a = ExpProcessor.expToOpArg(fi, node.exp, ExpProcessor.ARG_REG).arg!;
+    int a = ExpProcessor.expToOpArg(fi, node.exp, ExpProcessor.argReg).arg!;
     fi.usedRegs = oldRegs;
 
     int line = ExpHelper.lastLineOf(node.exp);
@@ -133,7 +133,7 @@ class StatProcessor {
       }
 
       int oldRegs = fi.usedRegs;
-      int a = ExpProcessor.expToOpArg(fi, exp, ExpProcessor.ARG_REG).arg!;
+      int a = ExpProcessor.expToOpArg(fi, exp, ExpProcessor.argReg).arg!;
       fi.usedRegs = oldRegs;
 
       int line = ExpHelper.lastLineOf(exp);
@@ -331,7 +331,7 @@ class StatProcessor {
     int lastLine = node.lastLine;
     for (int i = 0; i < node.varList.length; i++) {
       Exp? exp = node.varList[i];
-      if (! (exp is NameExp)) {
+      if (exp is! NameExp) {
         fi.emitSetTable(lastLine, tRegs[i], kRegs[i], vRegs[i]);
         continue;
       }

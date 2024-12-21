@@ -229,7 +229,7 @@ class StringLib {
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.format
   static int _strFormat(LuaState ls) {
     var fmtStr = ls.checkString(1)!;
-    if (fmtStr.length <= 1 || fmtStr.indexOf('%') < 0) {
+    if (fmtStr.length <= 1 || !fmtStr.contains('%')) {
       ls.pushString(fmtStr);
       return 1;
     }
@@ -253,7 +253,7 @@ class StringLib {
   }
 
   static List<String?> parseFmtStr(String fmt) {
-    if (fmt == "" || fmt.indexOf('%') < 0) {
+    if (fmt == "" || !fmt.contains('%')) {
       return [fmt];
     }
 
@@ -288,13 +288,13 @@ class StringLib {
       case 'c': // character
         return String.fromCharCode(ls.toInteger(argIdx));
       case 'i':
-        tag = tag.substring(0, tag.length - 1) + "d"; // %i -> %d
+        tag = "${tag.substring(0, tag.length - 1)}d"; // %i -> %d
         return sprintf(tag, [ls.toInteger(argIdx)]);
       case 'd':
       case 'o': // integer, octal
         return sprintf(tag, [ls.toInteger(argIdx)]);
       case 'u': // unsigned integer
-        tag = tag.substring(0, tag.length - 1) + "d"; // %u -> %d
+        tag = "${tag.substring(0, tag.length - 1)}d"; // %u -> %d
         return sprintf(tag, [ls.toInteger(argIdx)]);
       case 'x':
       case 'X': // hex integer
@@ -305,7 +305,7 @@ class StringLib {
       case 'q': // string
         return sprintf(tag, [ls.toString2(argIdx)]);
       default:
-        throw Exception("todo! tag=" + tag);
+        throw Exception("todo! tag=$tag");
     }
   }
 
@@ -454,7 +454,7 @@ class StringLib {
     var s = ls.checkString(1);
     var pattern = ls.checkString(2);
 
-    Function gmatchAux = (LuaState ls) {
+    gmatchAux(LuaState ls) {
       var captures = match(s, pattern!, 1);
       if (captures != null) {
         String? last;
@@ -469,9 +469,9 @@ class StringLib {
       } else {
         return 0;
       }
-    };
+    }
 
-    ls.pushDartFunction(gmatchAux as int Function(LuaState));
+    ls.pushDartFunction(gmatchAux);
     return 1;
   }
 

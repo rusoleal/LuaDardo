@@ -1,15 +1,15 @@
 import '../api/lua_state.dart';
 import '../api/lua_type.dart';
 
-const MAX_LEN = 1000000; // TODO
+const maxLen = 1000000; // TODO
 
 ///
 /// Operations that an object must define to mimic a table
 /// (some functions only need some of them)
-const TAB_R = 1; /* read */
-const TAB_W = 2; /* write */
-const TAB_L = 4; /* length */
-const TAB_RW = (TAB_R | TAB_W); /* read/write */
+const tabR = 1; /* read */
+const tabW = 2; /* write */
+const tabL = 4; /* length */
+const tabRW = (tabR | tabW); /* read/write */
 
 class TableLib {
   static const Map<String, DartFunction> _tabFuncs = {
@@ -38,8 +38,8 @@ class TableLib {
     if (!ls.isNoneOrNil(5)) {
       tt = 5;
     }
-    _checkTab(ls, 1, TAB_R);
-    _checkTab(ls, tt, TAB_W);
+    _checkTab(ls, 1, tabR);
+    _checkTab(ls, tt, tabW);
     if (e >= f) {
       /* otherwise, nothing to move */
       int i;
@@ -67,7 +67,7 @@ class TableLib {
 // http://www.lua.org/manual/5.3/manual.html#pdf-table.insert
 // lua-5.3.4/src/ltablib.c#tinsert()
   static int _tabInsert(LuaState ls) {
-    var e = _auxGetN(ls, 1, TAB_RW)! + 1; /* first empty element */
+    var e = _auxGetN(ls, 1, tabRW)! + 1; /* first empty element */
     int? pos; /* where to insert new element */
     switch (ls.getTop()) {
       case 2:
@@ -96,7 +96,7 @@ class TableLib {
 // http://www.lua.org/manual/5.3/manual.html#pdf-table.remove
 // lua-5.3.4/src/ltablib.c#tremove()
   static int _tabRemove(LuaState ls) {
-    var size = _auxGetN(ls, 1, TAB_RW)!;
+    var size = _auxGetN(ls, 1, tabRW)!;
     var pos = ls.optInteger(2, size)!;
     if (pos != size) {
       /* validate 'pos' if given */
@@ -116,7 +116,7 @@ class TableLib {
 // http://www.lua.org/manual/5.3/manual.html#pdf-table.concat
 // lua-5.3.4/src/ltablib.c#tconcat()
   static int _tabConcat(LuaState ls) {
-    var tabLen = _auxGetN(ls, 1, TAB_R);
+    var tabLen = _auxGetN(ls, 1, tabR);
     var sep = ls.optString(2, "");
     var i = ls.optInteger(3, 1)!;
     var j = ls.optInteger(4, tabLen)!;
@@ -142,7 +142,7 @@ class TableLib {
   }
 
   static int? _auxGetN(LuaState ls, int n, int w) {
-    _checkTab(ls, n, w | TAB_L);
+    _checkTab(ls, n, w | tabL);
     return ls.len2(n);
   }
 
@@ -156,9 +156,9 @@ class TableLib {
       var n = 1; /* number of elements to pop */
       var nL = List<int>.filled(1,0)..[0] = n;
       if (ls.getMetatable(arg) && /* must have metatable */
-          (what & TAB_R != 0 || _checkField(ls, "__index", nL)) &&
-          (what & TAB_W != 0 || _checkField(ls, "__newindex", nL)) &&
-          (what & TAB_L != 0 || _checkField(ls, "__len", nL))) {
+          (what & tabR != 0 || _checkField(ls, "__index", nL)) &&
+          (what & tabW != 0 || _checkField(ls, "__newindex", nL)) &&
+          (what & tabL != 0 || _checkField(ls, "__len", nL))) {
         ls.pop(n); /* pop metatable and tested metamethods */
       } else {
         ls.checkType(arg, LuaType.luaTable); /* force an error */
@@ -202,7 +202,7 @@ class TableLib {
     }
 
     var n = e - i + 1;
-    if (n <= 0 || n >= MAX_LEN || !ls.checkStack(n)) {
+    if (n <= 0 || n >= maxLen || !ls.checkStack(n)) {
       return ls.error2("too many results to unpack");
     }
 
@@ -221,7 +221,7 @@ class TableLib {
   static int _tabSort(LuaState ls) {
     var sort = _SortHelper(ls);
     var len = sort.len()!;
-    ls.argCheck(len < MAX_LEN, 1, "array too big");
+    ls.argCheck(len < maxLen, 1, "array too big");
     sort.quickSort(0, len - 1);
     return 0;
   }

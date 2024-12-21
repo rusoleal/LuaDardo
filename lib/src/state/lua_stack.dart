@@ -117,7 +117,7 @@ class LuaStack {
   }
 
   void reverse(int from, int to) {
-    var obj;
+    Object? obj;
     for (; from < to; from++, to--) {
       obj = slots[from];
       slots[from] = slots[to];

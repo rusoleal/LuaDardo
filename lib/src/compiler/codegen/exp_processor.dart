@@ -12,11 +12,11 @@ class ArgAndKind {
 
 class ExpProcessor {
   // kind of operands
-  static final int ARG_CONST = 1; // const index
-  static final int ARG_REG = 2; // register index
-  static final int ARG_UPVAL = 4; // upvalue index
-  static final int ARG_RK = ARG_REG | ARG_CONST;
-  static final int ARG_RU = ARG_REG | ARG_UPVAL;
+  static final int argConst = 1; // const index
+  static final int argReg = 2; // register index
+  static final int argUpval = 4; // upvalue index
+  static final int argRk = argReg | argConst;
+  static final int argRu = argReg | argUpval;
 
   //static final int ARG_RUK   = ARG_REG | ARG_UPVAL | ARG_CONST;
 
@@ -141,33 +141,33 @@ class ExpProcessor {
   // r[a] = op exp
   static void processUnopExp(FuncInfo fi, UnopExp node, int? a) {
     int oldRegs = fi.usedRegs;
-    int? b = expToOpArg(fi, node.exp, ARG_REG).arg;
+    int? b = expToOpArg(fi, node.exp, argReg).arg;
     fi.emitUnaryOp(node.line, node.op, a, b);
     fi.usedRegs = oldRegs;
   }
 
   // r[a] = exp1 op exp2
   static void processBinopExp(FuncInfo fi, BinopExp node, int? a) {
-    if (node.op == TokenKind.TOKEN_OP_AND || node.op == TokenKind.TOKEN_OP_OR) {
+    if (node.op == TokenKind.opAnd || node.op == TokenKind.opOr) {
       int oldRegs = fi.usedRegs;
 
-      int? b = expToOpArg(fi, node.exp1, ARG_REG).arg;
+      int? b = expToOpArg(fi, node.exp1, argReg).arg;
       fi.usedRegs = oldRegs;
-      if (node.op == TokenKind.TOKEN_OP_AND) {
+      if (node.op == TokenKind.opAnd) {
         fi.emitTestSet(node.line, a!, b!, 0);
       } else {
         fi.emitTestSet(node.line, a!, b!, 1);
       }
       int pcOfJmp = fi.emitJmp(node.line, 0, 0);
 
-      b = expToOpArg(fi, node.exp2, ARG_REG).arg;
+      b = expToOpArg(fi, node.exp2, argReg).arg;
       fi.usedRegs = oldRegs;
       fi.emitMove(node.line, a, b!);
       fi.fixSbx(pcOfJmp, fi.pc() - pcOfJmp);
     } else {
       int oldRegs = fi.usedRegs;
-      int? b = expToOpArg(fi, node.exp1, ARG_RK).arg;
-      int? c = expToOpArg(fi, node.exp2, ARG_RK).arg;
+      int? b = expToOpArg(fi, node.exp1, argRk).arg;
+      int? c = expToOpArg(fi, node.exp2, argRk).arg;
       fi.emitBinaryOp(node.line, node.op, a, b, c);
       fi.usedRegs = oldRegs;
     }
@@ -183,7 +183,7 @@ class ExpProcessor {
     int c = fi.usedRegs - 1;
     int b = c - node.exps.length + 1;
     fi.freeRegs(c - b + 1);
-    fi.emitABC(node.line, OpCodeKind.CONCAT, a, b, c);
+    fi.emitABC(node.line, OpCodeKind.concat, a, b, c);
   }
 
   // r[a] = name
@@ -210,12 +210,12 @@ class ExpProcessor {
   // r[a] = prefix[key]
   static void processTableAccessExp(FuncInfo fi, TableAccessExp node, int? a) {
     int oldRegs = fi.usedRegs;
-    ArgAndKind argAndKindB = expToOpArg(fi, node.prefixExp, ARG_RU);
+    ArgAndKind argAndKindB = expToOpArg(fi, node.prefixExp, argRu);
     int? b = argAndKindB.arg;
-    int? c = expToOpArg(fi, node.keyExp, ARG_RK).arg;
+    int? c = expToOpArg(fi, node.keyExp, argRk).arg;
     fi.usedRegs = oldRegs;
 
-    if (argAndKindB.kind == ARG_UPVAL) {
+    if (argAndKindB.kind == argUpval) {
       fi.emitGetTabUp(node.lastLine, a!, b!, c!);
     } else {
       fi.emitGetTable(node.lastLine, a!, b!, c!);
@@ -242,9 +242,9 @@ class ExpProcessor {
     processExp(fi, node.prefixExp, a, 1);
     if (node.nameExp != null) {
       fi.allocReg();
-      ArgAndKind argAndKindC = expToOpArg(fi, node.nameExp, ARG_RK);
+      ArgAndKind argAndKindC = expToOpArg(fi, node.nameExp, argRk);
       fi.emitSelf(node.line, a, a, argAndKindC.arg!);
-      if (argAndKindC.kind == ARG_REG) {
+      if (argAndKindC.kind == argReg) {
         fi.freeRegs(1);
       }
     }
@@ -274,7 +274,7 @@ class ExpProcessor {
   static ArgAndKind expToOpArg(FuncInfo fi, Exp? node, int argKinds) {
     ArgAndKind ak = ArgAndKind();
 
-    if ((argKinds & ARG_CONST) > 0) {
+    if ((argKinds & argConst) > 0) {
       int idx = -1;
       if (node is NilExp) {
         idx = fi.indexOfConstant(null);
@@ -291,25 +291,25 @@ class ExpProcessor {
       }
       if (idx >= 0 && idx <= 0xFF) {
         ak.arg = 0x100 + idx;
-        ak.kind = ARG_CONST;
+        ak.kind = argConst;
         return ak;
       }
     }
 
     if (node is NameExp) {
-      if ((argKinds & ARG_REG) > 0) {
+      if ((argKinds & argReg) > 0) {
         int r = fi.slotOfLocVar(node.name)!;
         if (r >= 0) {
           ak.arg = r;
-          ak.kind = ARG_REG;
+          ak.kind = argReg;
           return ak;
         }
       }
-      if ((argKinds & ARG_UPVAL) > 0) {
+      if ((argKinds & argUpval) > 0) {
         int idx = fi.indexOfUpval(node.name);
         if (idx >= 0) {
           ak.arg = idx;
-          ak.kind = ARG_UPVAL;
+          ak.kind = argUpval;
           return ak;
         }
       }
@@ -318,7 +318,7 @@ class ExpProcessor {
     int a = fi.allocReg();
     processExp(fi, node, a, 1);
     ak.arg = a;
-    ak.kind = ARG_REG;
+    ak.kind = argReg;
     return ak;
   }
 }

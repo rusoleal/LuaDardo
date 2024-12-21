@@ -6,20 +6,20 @@ import '../api/lua_state.dart';
 import '../api/lua_type.dart';
 
 // key, in the registry, for table of loaded modules
-const lua_loaded_table = "_LOADED";
+const luaLoadedTable = "_LOADED";
 
 // key, in the registry, for table of preloaded loaders
-const lua_preload_table = "_PRELOAD";
+const luaPreloadTable = "_PRELOAD";
 
 
-const lua_path_sep = ";";
-const lua_path_mark = "?";
-const lua_exec_dir = "!";
-const lua_igmark = "-";
+const luaPathSep = ";";
+const luaPathMark = "?";
+const luaExecDir = "!";
+const luaIgmark = "-";
 
 class PackageLib {
   //static final lua_dirsep = Platform.pathSeparator;
-  static get lua_dirsep {
+  static get luaDirSep {
     try {
       return Platform.pathSeparator;
     }
@@ -29,7 +29,7 @@ class PackageLib {
         return "/";
       }
       else {
-        throw e;
+        rethrow;
       }
     }
   }
@@ -54,13 +54,13 @@ class PackageLib {
     ls.setField(-2, "path");
     // store config information
     ls.pushString(
-        '$lua_dirsep\n$lua_path_sep\n$lua_path_mark\n$lua_exec_dir\n$lua_igmark\n');
+        '$luaDirSep\n$luaPathSep\n$luaPathMark\n$luaExecDir\n$luaIgmark\n');
     ls.setField(-2, "config");
     // set field 'loaded'
-    ls.getSubTable(luaRegistryIndex, lua_loaded_table);
+    ls.getSubTable(luaRegistryIndex, luaLoadedTable);
     ls.setField(-2, "loaded");
     // set field 'preload'
-    ls.getSubTable(luaRegistryIndex, lua_preload_table);
+    ls.getSubTable(luaRegistryIndex, luaPreloadTable);
     ls.setField(-2, "preload");
     ls.pushGlobalTable();
     ls.pushValue(-2); // set 'package' as upvalue for next lib
@@ -87,7 +87,7 @@ class PackageLib {
 
     if (ls.getField(-1, name) == LuaType.luaNil) {
       /* not found? */
-      ls.pushString("\n\tno field package.preload['" + name! + "']");
+      ls.pushString("\n\tno field package.preload['${name!}']");
     }
     return 1;
   }
@@ -101,7 +101,7 @@ class PackageLib {
     }
 
     try {
-      var filename = _searchPath(name, path, ".", lua_dirsep);
+      var filename = _searchPath(name, path, ".", luaDirSep);
       if (ls.loadFile(filename) == ThreadStatus.luaOk) {
         /* module loaded successfully? */
         ls.pushString(filename); /* will be 2nd argument to module */
@@ -122,19 +122,19 @@ class PackageLib {
       name = name!.replaceAll(sep!, dirSep!);
     }
 
-    for (var filename in path.split(lua_path_sep)) {
-      filename = filename.replaceAll(lua_path_mark, name!);
+    for (var filename in path.split(luaPathSep)) {
+      filename = filename.replaceAll(luaPathMark, name!);
       if (FileSystemEntity.isDirectorySync(filename)) {
         if (Directory(filename).existsSync()) {
           return filename;
         } else {
-          throw Exception("\n\tno file '" + filename + "'");
+          throw Exception("\n\tno file '$filename'");
         }
       } else {
         if (File(filename).existsSync()) {
           return filename;
         } else {
-          throw Exception("\n\tno file '" + filename + "'");
+          throw Exception("\n\tno file '$filename'");
         }
       }
     }
@@ -148,7 +148,7 @@ class PackageLib {
     var name = ls.checkString(1);
     var path = ls.checkString(2)!;
     var sep = ls.optString(3, ".");
-    var rep = ls.optString(4, lua_dirsep);
+    var rep = ls.optString(4, luaDirSep);
 
     try {
       var filename = _searchPath(name, path, sep, rep);
@@ -166,7 +166,7 @@ class PackageLib {
   static int _pkgRequire(LuaState ls) {
     var name = ls.checkString(1);
     ls.setTop(1); // LOADED table will be at index 2
-    ls.getField(luaRegistryIndex, lua_loaded_table);
+    ls.getField(luaRegistryIndex, luaLoadedTable);
     ls.getField(2, name); // LOADED[name]
     if (ls.toBoolean(-1)) {
       // is it there?

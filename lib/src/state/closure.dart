@@ -9,11 +9,11 @@ class Closure {
   final List<UpvalueHolder?> upvals;
 
   Closure(Prototype this.proto) :
-        this.dartFunc = null,
-        this.upvals = List<UpvalueHolder?>.filled(proto.upvalues.length,null);
+        dartFunc = null,
+        upvals = List<UpvalueHolder?>.filled(proto.upvalues.length,null);
 
   Closure.DartFunc(this.dartFunc, int nUpvals) :
-        this.proto = null,
-        this.upvals = List<UpvalueHolder?>.filled(nUpvals,null);
+        proto = null,
+        upvals = List<UpvalueHolder?>.filled(nUpvals,null);
 
 }
