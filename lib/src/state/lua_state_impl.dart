@@ -70,6 +70,10 @@ class LuaStateImpl implements LuaState, LuaVM {
       val.metatable = mt;
       return;
     }
+    if (val is Userdata) {
+      val.metatable = mt;
+      return;
+    }
     String key = "_MT${LuaValue.typeOf(val)}";
     registry!.put(key, mt);
   }
@@ -456,6 +460,14 @@ class LuaStateImpl implements LuaState, LuaVM {
       Object? v = t.get(k);
 
       if (raw || v != null || !tbl.hasMetafield("__index")) {
+        _stack!.push(v);
+        return LuaValue.typeOf(v);
+      }
+    }
+    if (t is Userdata) {
+      Object? v = t.metatable?.get(k);
+
+      if (raw || v != null || !t.hasMetafield("__index")) {
         _stack!.push(v);
         return LuaValue.typeOf(v);
       }

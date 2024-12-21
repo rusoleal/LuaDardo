@@ -1,3 +1,7 @@
+## 0.0.11
+
+* UserData with metatables
+
 ## 0.0.10
 
 * UserData methods casted to UserData<T>
